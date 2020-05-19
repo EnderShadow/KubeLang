@@ -1,0 +1,7 @@
+module HelloWorld {
+    import IO
+
+    fun main() {
+        val temp = "Invalid String""
+    }
+}

@@ -1,0 +1,13 @@
+module HelloWorld {
+    import IO
+
+    fun main() {
+        # non-sensical code used for validating the lexer
+        val temp = 1 + 1.0 * true
+        println("""\"Hello
+World
+from
+multiple
+lines!\"""")
+    }
+}
