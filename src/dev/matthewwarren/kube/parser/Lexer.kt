@@ -47,7 +47,7 @@ enum class TokenType(val regex: Regex) {
     NULL_LITERAL(Regex("""null""")),
     CHARACTER_LITERAL(Regex("""'([^'\\]|\\[btnr\\"']|\\u[a-fA-F\d]{4}|\\U[a-fA-F\d]{6})'""")),
     STRING_LITERAL(Regex(""""([^"\\]|\\[btnr\\"']|\\u[a-fA-F\d]{4}|\\U[a-fA-F\d]{6})*"""")),
-    RAW_STRING_LITERAL(Regex("""""\"([^"\\]|\\[\\"])*""\"""")),
+    RAW_STRING_LITERAL(Regex("""""\".*?""\"""")),
     BOOLEAN_LITERAL(Regex("""true|false""")),
     FLOATING_POINT_LITERAL(Regex("""\d+\.\d+([eE][+-]?\d+)?|0[xX][a-fA-F\d]+\.[a-fA-F\d]+([pP][+-]?\d+)?""")),
     INTEGER_LITERAL(Regex("""\d(_+\d|\d)*|0[xX][a-fA-F\d](_+[a-fA-F\d]|[a-fA-F\d])*|0[bB][01](_+[01]|[01])*""")),

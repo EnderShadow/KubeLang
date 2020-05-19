@@ -16,6 +16,12 @@ fun lexerTest(): Boolean {
         Lexer.parseFile(File("testFiles/shouldfail.kb"))
         return false
     }
+    catch(_: Throwable) {}
+    
+    try {
+        Lexer.parseFile(File("testFiles/MultiLineStringShouldFail.kb"))
+        return false
+    }
     catch(_: Throwable) {
         return true
     }
