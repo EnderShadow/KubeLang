@@ -3,6 +3,7 @@ package dev.matthewwarren.kube.test
 fun main() {
     println("Running tests")
     runTest("Lexer", ::lexerTest)
+    runTest("Lexer", ::parserTest)
     println("Tests completed")
 }
 

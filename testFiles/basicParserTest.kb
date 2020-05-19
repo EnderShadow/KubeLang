@@ -1,0 +1,8 @@
+module ParserTest {
+    import IO
+    import Dummy
+
+    public interface Alice
+    private class Bob
+    internal class Eve
+}
