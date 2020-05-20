@@ -123,6 +123,7 @@ enum class TokenType(val regex: Regex) {
     FUN(Regex("""fun""")),
     SET(Regex("""set""")),
     GET(Regex("""get""")),
+    RETURN(Regex("""return""")),
     STATIC(Regex("""static""")),
     PUBLIC(Regex("""public""")),
     INTERNAL(Regex("""internal""")),
