@@ -82,15 +82,9 @@ fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleE
 
 fun parseInitializer(tokens: List<Token>, startIndex: Int): Pair<Initializer, Int> {
     expect(tokens, startIndex, TokenType.INIT, TokenType.LEFT_CURLY_BRACKET)
-    val statements = mutableListOf<Statement>()
-    var index = startIndex + 2
-    while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
-        val (statement, newIndex) = parseStatement(tokens, index)
-        statements.add(statement)
-        index = newIndex
-    }
-    expect(tokens, index, TokenType.RIGHT_CURLY_BRACKET)
-    return Pair(Initializer(statements), index + 1)
+    val (statements, newIndex) = parseStatements(tokens, startIndex + 2)
+    expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
+    return Pair(Initializer(statements), newIndex + 1)
 }
 
 fun parseInterface(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Interface, Int> {
@@ -173,6 +167,17 @@ fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pa
 
 fun parseVariable(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Variable, Int> {
     TODO()
+}
+
+fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>, Int> {
+    val statements = mutableListOf<Statement>()
+    var index = startIndex
+    while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
+        val (statement, newIndex) = parseStatement(tokens, index)
+        statements.add(statement)
+        index = newIndex
+    }
+    return Pair(statements, index)
 }
 
 fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
