@@ -67,7 +67,7 @@ fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleE
             val (moduleContent, newIndex) = when(tokens[index].type) {
                 TokenType.INTERFACE -> parseInterface(tokens, index, visibility)
                 TokenType.CLASS -> parseClass(tokens, index, visibility)
-                TokenType.FUN -> parseFunction(tokens, index, visibility)
+                TokenType.FUN -> parseFunction(tokens, index, visibility, true)
                 TokenType.VAL -> parseValue(tokens, index, visibility)
                 TokenType.VAR -> parseVariable(tokens, index, visibility)
                 else -> throw IllegalStateException("This cannot occur")
@@ -157,8 +157,65 @@ fun parseClass(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pa
     return Pair(Class(visibility, name, genericDeclaration, superTypes, classContents), index)
 }
 
-fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Function, Int> {
-    TODO()
+fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, requiresBody: Boolean): Pair<Function, Int> {
+    expect(tokens, startIndex, TokenType.FUN, TokenType.IDENTIFIER)
+    val name = tokens[startIndex + 1].text
+    var index = startIndex + 2
+    val genericDeclaration = if(check(tokens, index, TokenType.LEFT_ANGLE_BRACKET)) {
+        val (genericDeclaration, newIndex) = parseGenericDeclaration(tokens, index)
+        index = newIndex
+        genericDeclaration
+    }
+    else {
+        null
+    }
+    
+    expect(tokens, index, TokenType.LEFT_PARENTHESIS)
+    val parameters = if(!check(tokens, index + 1, TokenType.RIGHT_PARENTHESIS)) {
+        val parameters = mutableListOf<Pair<String, Type>>()
+        do {
+            val (parameter, newIndex) = parseParameter(tokens, index + 1)
+            parameters.add(parameter)
+            index = newIndex
+        } while(check(tokens, index, TokenType.COMMA))
+        parameters
+    }
+    else {
+        index++
+        emptyList()
+    }
+    expect(tokens, index, TokenType.RIGHT_PARENTHESIS)
+    index++
+    val returnType = if(check(tokens, index, TokenType.COLON)) {
+        val (type, newIndex) = parseType(tokens, index + 1)
+        index = newIndex
+        type
+    }
+    else {
+        TODO() // replace with 0-tuple
+    }
+    
+    val body = if(requiresBody) {
+        expect(tokens, index, TokenType.LEFT_CURLY_BRACKET)
+        val (statements, newIndex) = parseStatements(tokens, index + 1)
+        expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
+        index = newIndex + 1
+        statements
+    }
+    else {
+        if(check(tokens, index, TokenType.LEFT_CURLY_BRACKET)) {
+            val (statements, newIndex) = parseStatements(tokens, index + 1)
+            expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
+            index = newIndex + 1
+            statements
+        }
+        else {
+            null
+        }
+    }
+    
+    val function = Function(visibility, name, genericDeclaration, returnType, parameters, body)
+    return Pair(function, index)
 }
 
 fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Value, Int> {
@@ -197,6 +254,14 @@ fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<Inte
 }
 
 fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassElement>, Int> {
+    TODO()
+}
+
+fun parseParameter(tokens: List<Token>, startIndex: Int): Pair<Pair<String, Type>, Int> {
+    TODO()
+}
+
+fun parseType(tokens: List<Token>, startIndex: Int): Pair<Type, Int> {
     TODO()
 }
 
@@ -270,7 +335,7 @@ data class Interface(val visibility: Visibility, val name: String, val generics:
 
 data class Class(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<ClassElement>): ModuleElement
 
-data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>): ModuleElement, InterfaceElement, ClassElement
+data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
 
 data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
 
