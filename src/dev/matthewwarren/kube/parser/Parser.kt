@@ -196,7 +196,8 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
     }
     
     val body = if(requiresBody) {
-        expect(tokens, index, TokenType.LEFT_CURLY_BRACKET)
+        if(!check(tokens, index, TokenType.LEFT_CURLY_BRACKET))
+            throw SyntaxException("Missing function body on line ${tokens[index].line}, column ${tokens[index].column}, in file ${tokens[index].file.name}")
         val (statements, newIndex) = parseStatements(tokens, index + 1)
         expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
         index = newIndex + 1
@@ -219,11 +220,97 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
 }
 
 fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Value, Int> {
-    TODO()
+    expect(tokens, startIndex, TokenType.VAL, TokenType.IDENTIFIER)
+    val name = tokens[startIndex + 1].text
+    var index = startIndex + 2
+    val type = if(check(tokens, index, TokenType.COLON)) {
+        val (type, newIndex) = parseType(tokens, index + 1)
+        index = newIndex
+        type
+    }
+    else {
+        null // need to determine type from expression
+    }
+    
+    val expression = if(check(tokens, index, TokenType.EQUALS)) {
+        val (expression, newIndex) = parseExpression(tokens, index + 1)
+        index = newIndex
+        expression
+    }
+    else if(type == null) {
+        throw SyntaxException("Missing type or initialization expression for value on line ${tokens[index].line}, column ${tokens[index].column}, in file ${tokens[index].file.name}")
+    }
+    else {
+        null
+    }
+    
+    val getter = if(check(tokens, index, TokenType.GET)) {
+        expect(tokens, index, TokenType.GET, TokenType.LEFT_PARENTHESIS, TokenType.RIGHT_PARENTHESIS, TokenType.RIGHT_CURLY_BRACKET)
+        val (statements, newIndex) = parseStatements(tokens, index + 4)
+        index = newIndex
+        statements
+    }
+    else {
+        emptyList()
+    }
+    
+    return Pair(Value(visibility, name, type, expression, getter), index)
 }
 
 fun parseVariable(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Variable, Int> {
-    TODO()
+    expect(tokens, startIndex, TokenType.VAR, TokenType.IDENTIFIER)
+    val name = tokens[startIndex + 1].text
+    var index = startIndex + 2
+    val type = if(check(tokens, index, TokenType.COLON)) {
+        val (type, newIndex) = parseType(tokens, index + 1)
+        index = newIndex
+        type
+    }
+    else {
+        null // need to determine type from expression
+    }
+    
+    val expression = if(check(tokens, index, TokenType.EQUALS)) {
+        val (expression, newIndex) = parseExpression(tokens, index + 1)
+        index = newIndex
+        expression
+    }
+    else if(type == null) {
+        throw SyntaxException("Missing type or initialization expression for value on line ${tokens[index].line}, column ${tokens[index].column}, in file ${tokens[index].file.name}")
+    }
+    else {
+        null
+    }
+    
+    var getter = if(check(tokens, index, TokenType.GET)) {
+        expect(tokens, index, TokenType.GET, TokenType.LEFT_PARENTHESIS, TokenType.RIGHT_PARENTHESIS, TokenType.RIGHT_CURLY_BRACKET)
+        val (statements, newIndex) = parseStatements(tokens, index + 4)
+        index = newIndex
+        statements
+    }
+    else {
+        emptyList()
+    }
+    
+    val setter = if(check(tokens, index, TokenType.SET)) {
+        expect(tokens, index, TokenType.SET, TokenType.LEFT_PARENTHESIS, TokenType.IDENTIFIER, TokenType.RIGHT_PARENTHESIS, TokenType.RIGHT_CURLY_BRACKET)
+        val parameterName = tokens[index + 2].text
+        val (statements, newIndex) = parseStatements(tokens, index + 5)
+        index = newIndex
+        Pair(parameterName, statements)
+    }
+    else {
+        Pair("", emptyList())
+    }
+    
+    if(getter.isEmpty() && check(tokens, index, TokenType.GET)) {
+        expect(tokens, index, TokenType.GET, TokenType.LEFT_PARENTHESIS, TokenType.RIGHT_PARENTHESIS, TokenType.RIGHT_CURLY_BRACKET)
+        val (statements, newIndex) = parseStatements(tokens, index + 4)
+        index = newIndex
+        getter = statements
+    }
+    
+    return Pair(Variable(visibility, name, type, expression, getter, setter), index)
 }
 
 fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>, Int> {
@@ -238,6 +325,10 @@ fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>,
 }
 
 fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
+    TODO()
+}
+
+fun parseExpression(tokens: List<Token>, startIndex: Int): Pair<Expression, Int> {
     TODO()
 }
 
@@ -337,7 +428,7 @@ data class Class(val visibility: Visibility, val name: String, val generics: Gen
 
 data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
 
-data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
+data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: Pair<String, List<Statement>>): ModuleElement, InterfaceElement, ClassElement
 
 data class Value(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
 
