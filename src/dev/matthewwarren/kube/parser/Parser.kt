@@ -276,7 +276,61 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
 }
 
 fun parseConstructor(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Constructor, Int> {
-    TODO()
+    expect(tokens, startIndex, TokenType.CONSTRUCTOR, TokenType.LEFT_PARENTHESIS)
+    
+    var index = startIndex + 1
+    val parameters = if(!check(tokens, index + 1, TokenType.RIGHT_PARENTHESIS)) {
+        val parameters = mutableListOf<Pair<String, Type>>()
+        do {
+            val (parameter, newIndex) = parseParameter(tokens, index + 1)
+            parameters.add(parameter)
+            index = newIndex
+        } while(check(tokens, index, TokenType.COMMA))
+        parameters
+    }
+    else {
+        index++
+        emptyList()
+    }
+    expect(tokens, index, TokenType.RIGHT_PARENTHESIS)
+    index++
+    
+    val callsSuper: Boolean
+    val parentConstructorParameters: List<Expression>
+    if(check(tokens, index, TokenType.COLON)) {
+        expect(tokens, index + 1, setOf(TokenType.THIS, TokenType.SUPER))
+        callsSuper = tokens[index + 1].type == TokenType.SUPER
+        expect(tokens, index + 2, TokenType.LEFT_PARENTHESIS)
+        if(!check(tokens, index + 3, TokenType.RIGHT_PARENTHESIS)) {
+            parentConstructorParameters = mutableListOf()
+            index += 2
+            do {
+                val (expression, newIndex) = parseExpression(tokens, index + 1)
+                parentConstructorParameters.add(expression)
+                index = newIndex
+            }
+            while(check(tokens, index, TokenType.COMMA))
+            expect(tokens, index, TokenType.RIGHT_PARENTHESIS)
+            index++
+        }
+        else {
+            parentConstructorParameters = emptyList()
+            index += 4
+        }
+    }
+    else {
+        callsSuper = true
+        parentConstructorParameters = emptyList()
+    }
+    
+    if(!check(tokens, index, TokenType.LEFT_CURLY_BRACKET))
+        throw SyntaxException("Missing constructor body on line ${tokens[index].line}, column ${tokens[index].column}, in file ${tokens[index].file.name}")
+    val (body, newIndex) = parseStatements(tokens, index + 1)
+    expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
+    index = newIndex + 1
+    
+    val constructor = Constructor(visibility, parameters, callsSuper, parentConstructorParameters, body)
+    return Pair(constructor, index)
 }
 
 fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Value, Int> {
@@ -506,7 +560,7 @@ data class Initializer(val statements: List<Statement>): ModuleElement, ClassEle
 data class Interface(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<InterfaceElement>): ModuleElement
 data class Class(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<ClassElement>): ModuleElement
 data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
-data class Constructor(val visibility: Visibility, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ClassElement
+data class Constructor(val visibility: Visibility, val parameters: List<Pair<String, Type>>, val callsSuper: Boolean, val parentConstructorParameters: List<Expression>, val children: List<Statement>?): ClassElement
 data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: Pair<String, List<Statement>>): ModuleElement, InterfaceElement, ClassElement
 data class Value(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
 
