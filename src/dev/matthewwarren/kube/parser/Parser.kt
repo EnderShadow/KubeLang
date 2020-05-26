@@ -376,7 +376,10 @@ fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassEle
 }
 
 fun parseParameter(tokens: List<Token>, startIndex: Int): Pair<Pair<String, Type>, Int> {
-    TODO()
+    expect(tokens, startIndex, TokenType.IDENTIFIER, TokenType.COLON)
+    val name = tokens[startIndex].text
+    val (type, index) = parseType(tokens, startIndex + 2)
+    return Pair(Pair(name, type), index)
 }
 
 fun parseType(tokens: List<Token>, startIndex: Int): Pair<Type, Int> {
