@@ -192,7 +192,7 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
         type
     }
     else {
-        TODO() // replace with 0-tuple
+        Type.Tuple0
     }
     
     val body = if(requiresBody) {
@@ -441,9 +441,24 @@ enum class Visibility {
 }
 
 data class Statement(var expression: Expression)
-
 data class Expression(val temp: Any?)
+data class GenericDeclaration(val genericTypes: List<Pair<String, Type>>)
 
-data class GenericDeclaration(val temp: Any?)
+data class Generic(val generics: List<Type>) {
+    override fun toString() = "<${generics.joinToString()}>"
+}
 
-data class Type(val temp: Any?)
+sealed class Type(val name: String) {
+    companion object {
+        val ANY = ObjectType("Any", null)
+        val Tuple0 = TupleType(emptyList())
+    }
+    
+    override fun toString() = name
+}
+
+class ObjectType(name: String, val generic: Generic?): Type(if(generic == null) name else "$name$generic")
+class TupleType(val types: List<Type>): Type("(${types.joinToString()})")
+class FunctionType(val parameterTypes: List<Type>, val returnType: Type): Type("(${parameterTypes.joinToString()}) -> $returnType")
+class IntersectionType(val types: List<Type>): Type("(${types.joinToString(" | ")})")
+class UnionType(val types: List<Type>): Type("(${types.joinToString(" & ")})")
