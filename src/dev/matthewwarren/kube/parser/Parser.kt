@@ -80,6 +80,62 @@ fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleE
     return Pair(moduleContents, index)
 }
 
+fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<InterfaceElement>, Int> {
+    val interfaceContents = mutableListOf<InterfaceElement>()
+    var index = startIndex
+    
+    while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
+        var visibility = Visibility.DEFAULT
+        if(check(tokens, index, setOf(TokenType.PRIVATE, TokenType.PUBLIC, TokenType.INTERNAL))) {
+            visibility = Visibility.valueOf(tokens[index].type.name)
+            index++
+        }
+        expect(tokens, index, setOf(TokenType.FUN, TokenType.VAL, TokenType.VAR))
+        val (interfaceContent, newIndex) = when(tokens[index].type) {
+            TokenType.FUN -> parseFunction(tokens, index, visibility, false)
+            TokenType.VAL -> parseValue(tokens, index, visibility)
+            TokenType.VAR -> parseVariable(tokens, index, visibility)
+            else -> throw IllegalStateException("This cannot occur")
+        }
+        interfaceContents.add(interfaceContent)
+        index = newIndex
+    }
+    
+    return Pair(interfaceContents, index)
+}
+
+fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassElement>, Int> {
+    val classContents = mutableListOf<ClassElement>()
+    var index = startIndex
+    
+    while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
+        if(check(tokens, index, TokenType.INIT)) {
+            val (initializer, newIndex) = parseInitializer(tokens, index)
+            classContents.add(initializer)
+            index = newIndex
+        }
+        else {
+            var visibility = Visibility.DEFAULT
+            if(check(tokens, index, setOf(TokenType.PRIVATE, TokenType.PUBLIC, TokenType.INTERNAL))) {
+                visibility = Visibility.valueOf(tokens[index].type.name)
+                index++
+            }
+            expect(tokens, index, setOf(TokenType.CONSTRUCTOR, TokenType.FUN, TokenType.VAL, TokenType.VAR))
+            val (classContent, newIndex) = when(tokens[index].type) {
+                TokenType.CONSTRUCTOR -> parseConstructor(tokens, index, visibility)
+                TokenType.FUN -> parseFunction(tokens, index, visibility, true)
+                TokenType.VAL -> parseValue(tokens, index, visibility)
+                TokenType.VAR -> parseVariable(tokens, index, visibility)
+                else -> throw IllegalStateException("This cannot occur")
+            }
+            classContents.add(classContent)
+            index = newIndex
+        }
+    }
+    
+    return Pair(classContents, index)
+}
+
 fun parseInitializer(tokens: List<Token>, startIndex: Int): Pair<Initializer, Int> {
     expect(tokens, startIndex, TokenType.INIT, TokenType.LEFT_CURLY_BRACKET)
     val (statements, newIndex) = parseStatements(tokens, startIndex + 2)
@@ -217,6 +273,10 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
     
     val function = Function(visibility, name, genericDeclaration, returnType, parameters, body)
     return Pair(function, index)
+}
+
+fun parseConstructor(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Constructor, Int> {
+    TODO()
 }
 
 fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Value, Int> {
@@ -367,14 +427,6 @@ fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
     return Pair(types, index)
 }
 
-fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<InterfaceElement>, Int> {
-    TODO()
-}
-
-fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassElement>, Int> {
-    TODO()
-}
-
 fun parseParameter(tokens: List<Token>, startIndex: Int): Pair<Pair<String, Type>, Int> {
     expect(tokens, startIndex, TokenType.IDENTIFIER, TokenType.COLON)
     val name = tokens[startIndex].text
@@ -451,15 +503,11 @@ interface InterfaceElement
 interface ClassElement
 
 data class Initializer(val statements: List<Statement>): ModuleElement, ClassElement
-
 data class Interface(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<InterfaceElement>): ModuleElement
-
 data class Class(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<ClassElement>): ModuleElement
-
 data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
-
+data class Constructor(val visibility: Visibility, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ClassElement
 data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: Pair<String, List<Statement>>): ModuleElement, InterfaceElement, ClassElement
-
 data class Value(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
 
 enum class Visibility {
