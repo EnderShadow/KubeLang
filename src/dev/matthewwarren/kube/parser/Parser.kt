@@ -333,7 +333,26 @@ fun parseExpression(tokens: List<Token>, startIndex: Int): Pair<Expression, Int>
 }
 
 fun parseGenericDeclaration(tokens: List<Token>, startIndex: Int): Pair<GenericDeclaration, Int> {
-    TODO()
+    expect(tokens, startIndex, TokenType.LEFT_ANGLE_BRACKET)
+    val genericTypes = mutableListOf<Pair<String, Type>>()
+    var index = startIndex
+    do {
+        expect(tokens, index + 1, TokenType.IDENTIFIER)
+        val name = tokens[index + 1].text
+        val type = if(check(tokens, index + 2, TokenType.COLON)) {
+            val (type, newIndex) = parseType(tokens, index + 3)
+            index = newIndex
+            type
+        }
+        else {
+            index += 2
+            Type.ANY
+        }
+        genericTypes.add(Pair(name, type))
+    } while(check(tokens, index, TokenType.COMMA))
+    
+    expect(tokens, index, TokenType.RIGHT_ANGLE_BRACKET)
+    return Pair(GenericDeclaration(genericTypes), index + 1)
 }
 
 fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
