@@ -101,7 +101,7 @@ fun parseInterface(tokens: List<Token>, startIndex: Int, visibility: Visibility)
     }
     
     val superTypes = if(check(tokens, index, TokenType.COLON)) {
-        val (typeList, newIndex) = parseTypeList(tokens, index + 1)
+        val (typeList, newIndex) = parseTypeList(tokens, index)
         index = newIndex
         typeList
     }
@@ -136,7 +136,7 @@ fun parseClass(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pa
     }
     
     val superTypes = if(check(tokens, index, TokenType.COLON)) {
-        val (typeList, newIndex) = parseTypeList(tokens, index + 1)
+        val (typeList, newIndex) = parseTypeList(tokens, index)
         index = newIndex
         typeList
     }
@@ -356,7 +356,15 @@ fun parseGenericDeclaration(tokens: List<Token>, startIndex: Int): Pair<GenericD
 }
 
 fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
-    TODO()
+    val types = mutableListOf<Type>()
+    var index = startIndex
+    do {
+        val (type, newIndex) = parseType(tokens, index + 1)
+        types.add(type)
+        index = newIndex
+    } while(check(tokens, index, TokenType.COMMA))
+    
+    return Pair(types, index)
 }
 
 fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<InterfaceElement>, Int> {
