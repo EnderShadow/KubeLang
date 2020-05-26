@@ -124,6 +124,8 @@ enum class TokenType(val regex: Regex) {
     SET(Regex("""set""")),
     GET(Regex("""get""")),
     RETURN(Regex("""return""")),
+    THIS(Regex("""this""")),
+    SUPER(Regex("""super""")),
     STATIC(Regex("""static""")),
     PUBLIC(Regex("""public""")),
     INTERNAL(Regex("""internal""")),
