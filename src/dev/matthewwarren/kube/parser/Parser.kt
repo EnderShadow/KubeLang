@@ -439,6 +439,59 @@ fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>,
 }
 
 fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
+    return when(tokens[startIndex].type) {
+        TokenType.VAL, TokenType.VAR -> parseLocalVariableStatement(tokens, startIndex)
+        TokenType.IF -> parseIfElseStatement(tokens, startIndex)
+        TokenType.FOR -> parseForStatement(tokens, startIndex)
+        TokenType.WHILE -> parseWhileStatement(tokens, startIndex)
+        TokenType.DO -> parseDoWhileStatement(tokens, startIndex)
+        else -> {
+            val (expression, index) = parseExpression(tokens, startIndex)
+            if(check(tokens, index, setOf(TokenType.ASSIGN, TokenType.MULTIPLY_ASSIGN, TokenType.DIVIDE_ASSIGN, TokenType.MODULUS_ASSIGN, TokenType.ADD_ASSIGN,
+                            TokenType.SUBTRACT_ASSIGN, TokenType.LEFT_SHIFT_ASSIGN, TokenType.ARITHMETIC_RIGHT_SHIFT_ASSIGN, TokenType.LOGICAL_RIGHT_SHIFT_ASSIGN,
+                            TokenType.BITWISE_AND_ASSIGN, TokenType.BITWISE_XOR_ASSIGN, TokenType.BITWISE_OR_ASSIGN))) {
+                val operator = when(tokens[index].type) {
+                    TokenType.ASSIGN -> AssignmentOperator.ASSIGN
+                    TokenType.MULTIPLY_ASSIGN -> AssignmentOperator.MULTIPLY_ASSIGN
+                    TokenType.DIVIDE_ASSIGN -> AssignmentOperator.DIVIDE_ASSIGN
+                    TokenType.MODULUS_ASSIGN -> AssignmentOperator.MODULUS_ASSIGN
+                    TokenType.ADD_ASSIGN -> AssignmentOperator.ADD_ASSIGN
+                    TokenType.SUBTRACT_ASSIGN -> AssignmentOperator.SUBTRACT_ASSIGN
+                    TokenType.LEFT_SHIFT_ASSIGN -> AssignmentOperator.LEFT_SHIFT_ASSIGN
+                    TokenType.ARITHMETIC_RIGHT_SHIFT_ASSIGN -> AssignmentOperator.ARITHMETIC_RIGHT_SHIFT_ASSIGN
+                    TokenType.LOGICAL_RIGHT_SHIFT_ASSIGN -> AssignmentOperator.LOGICAL_RIGHT_SHIFT_ASSIGN
+                    TokenType.BITWISE_AND_ASSIGN -> AssignmentOperator.AND_ASSIGN
+                    TokenType.BITWISE_XOR_ASSIGN -> AssignmentOperator.XOR_ASSIGN
+                    TokenType.BITWISE_OR_ASSIGN -> AssignmentOperator.OR_ASSIGN
+                    else -> throw SyntaxException("This can never happen")
+                }
+                val (rightExpression, newIndex) = parseExpression(tokens, index + 1)
+                Pair(AssignmentStatement(operator, expression, rightExpression), newIndex)
+            }
+            else {
+                Pair(ExpressionStatement(expression), index)
+            }
+        }
+    }
+}
+
+fun parseLocalVariableStatement(tokens: List<Token>, startIndex: Int): Pair<LocalVariableStatement, Int> {
+    TODO()
+}
+
+fun parseIfElseStatement(tokens: List<Token>, startIndex: Int): Pair<IfElseStatement, Int> {
+    TODO()
+}
+
+fun parseForStatement(tokens: List<Token>, startIndex: Int): Pair<ForStatement, Int> {
+    TODO()
+}
+
+fun parseWhileStatement(tokens: List<Token>, startIndex: Int): Pair<WhileStatement, Int> {
+    TODO()
+}
+
+fun parseDoWhileStatement(tokens: List<Token>, startIndex: Int): Pair<DoWhileStatement, Int> {
     TODO()
 }
 
@@ -572,7 +625,30 @@ enum class Visibility {
     }
 }
 
-data class Statement(var expression: Expression)
+sealed class Statement
+class LocalVariableStatement(val isValue: Boolean, val name: String, val type: Type?, val expression: Expression): Statement()
+class IfElseStatement(val condition: Expression, thenBlock: List<Statement>, elseBlock: List<Statement>): Statement()
+class ForStatement(val variableName: String, val iterable: Expression, statements: List<Statement>): Statement()
+class WhileStatement(val condition: Expression, statements: List<Statement>): Statement()
+class DoWhileStatement(val condition: Expression, statements: List<Statement>): Statement()
+class AssignmentStatement(val operator: AssignmentOperator, val leftExpression: Expression, val rightExpression: Expression): Statement()
+class ExpressionStatement(val expression: Expression): Statement()
+
+enum class AssignmentOperator {
+    ASSIGN,
+    MULTIPLY_ASSIGN,
+    DIVIDE_ASSIGN,
+    MODULUS_ASSIGN,
+    ADD_ASSIGN,
+    SUBTRACT_ASSIGN,
+    LEFT_SHIFT_ASSIGN,
+    ARITHMETIC_RIGHT_SHIFT_ASSIGN,
+    LOGICAL_RIGHT_SHIFT_ASSIGN,
+    AND_ASSIGN,
+    XOR_ASSIGN,
+    OR_ASSIGN
+}
+
 data class Expression(val temp: Any?)
 data class GenericDeclaration(val genericTypes: List<Pair<String, Type>>)
 
