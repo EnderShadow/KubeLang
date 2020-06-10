@@ -58,18 +58,18 @@ private fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List
             index = newIndex
         }
         else {
-            var visibility = Visibility.DEFAULT
-            if(check(tokens, index, setOf(TokenType.PRIVATE, TokenType.PUBLIC, TokenType.INTERNAL))) {
-                visibility = Visibility.valueOf(tokens[index].type.name)
+            val annotations = mutableListOf<String>()
+            while(check(tokens, index, TokenType.ANNOTATION)) {
+                annotations.add(tokens[index].text)
                 index++
             }
             expect(tokens, index, setOf(TokenType.INTERFACE, TokenType.CLASS, TokenType.FUN, TokenType.VAL, TokenType.VAR))
             val (moduleContent, newIndex) = when(tokens[index].type) {
-                TokenType.INTERFACE -> parseInterface(tokens, index, visibility)
-                TokenType.CLASS -> parseClass(tokens, index, visibility)
-                TokenType.FUN -> parseFunction(tokens, index, visibility, true)
-                TokenType.VAL -> parseValue(tokens, index, visibility)
-                TokenType.VAR -> parseVariable(tokens, index, visibility)
+                TokenType.INTERFACE -> parseInterface(tokens, index, annotations)
+                TokenType.CLASS -> parseClass(tokens, index, annotations)
+                TokenType.FUN -> parseFunction(tokens, index, annotations, true)
+                TokenType.VAL -> parseValue(tokens, index, annotations)
+                TokenType.VAR -> parseVariable(tokens, index, annotations)
                 else -> throw IllegalStateException("This cannot occur")
             }
             moduleContents.add(moduleContent)
@@ -85,16 +85,16 @@ private fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<L
     var index = startIndex
     
     while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
-        var visibility = Visibility.DEFAULT
-        if(check(tokens, index, setOf(TokenType.PRIVATE, TokenType.PUBLIC, TokenType.INTERNAL))) {
-            visibility = Visibility.valueOf(tokens[index].type.name)
+        val annotations = mutableListOf<String>()
+        while(check(tokens, index, TokenType.ANNOTATION)) {
+            annotations.add(tokens[index].text)
             index++
         }
         expect(tokens, index, setOf(TokenType.FUN, TokenType.VAL, TokenType.VAR))
         val (interfaceContent, newIndex) = when(tokens[index].type) {
-            TokenType.FUN -> parseFunction(tokens, index, visibility, false)
-            TokenType.VAL -> parseValue(tokens, index, visibility)
-            TokenType.VAR -> parseVariable(tokens, index, visibility)
+            TokenType.FUN -> parseFunction(tokens, index, annotations, false)
+            TokenType.VAL -> parseValue(tokens, index, annotations)
+            TokenType.VAR -> parseVariable(tokens, index, annotations)
             else -> throw IllegalStateException("This cannot occur")
         }
         interfaceContents.add(interfaceContent)
@@ -115,17 +115,17 @@ private fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<
             index = newIndex
         }
         else {
-            var visibility = Visibility.DEFAULT
-            if(check(tokens, index, setOf(TokenType.PRIVATE, TokenType.PUBLIC, TokenType.INTERNAL))) {
-                visibility = Visibility.valueOf(tokens[index].type.name)
+            val annotations = mutableListOf<String>()
+            while(check(tokens, index, TokenType.ANNOTATION)) {
+                annotations.add(tokens[index].text)
                 index++
             }
             expect(tokens, index, setOf(TokenType.CONSTRUCTOR, TokenType.FUN, TokenType.VAL, TokenType.VAR))
             val (classContent, newIndex) = when(tokens[index].type) {
-                TokenType.CONSTRUCTOR -> parseConstructor(tokens, index, visibility)
-                TokenType.FUN -> parseFunction(tokens, index, visibility, true)
-                TokenType.VAL -> parseValue(tokens, index, visibility)
-                TokenType.VAR -> parseVariable(tokens, index, visibility)
+                TokenType.CONSTRUCTOR -> parseConstructor(tokens, index, annotations)
+                TokenType.FUN -> parseFunction(tokens, index, annotations, true)
+                TokenType.VAL -> parseValue(tokens, index, annotations)
+                TokenType.VAR -> parseVariable(tokens, index, annotations)
                 else -> throw IllegalStateException("This cannot occur")
             }
             classContents.add(classContent)
@@ -175,7 +175,7 @@ private fun parseInterface(tokens: List<Token>, startIndex: Int, annotations: Li
         emptyList()
     }
     
-    return Pair(Interface(visibility, name, genericDeclaration, superTypes, interfaceContents), index)
+    return Pair(Interface(annotations, name, genericDeclaration, superTypes, interfaceContents), index)
 }
 
 private fun parseClass(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Class, Int> {
@@ -210,7 +210,7 @@ private fun parseClass(tokens: List<Token>, startIndex: Int, annotations: List<S
         emptyList()
     }
     
-    return Pair(Class(visibility, name, genericDeclaration, superTypes, classContents), index)
+    return Pair(Class(annotations, name, genericDeclaration, superTypes, classContents), index)
 }
 
 private fun parseFunction(tokens: List<Token>, startIndex: Int, annotations: List<String>, requiresBody: Boolean): Pair<Function, Int> {
@@ -271,7 +271,7 @@ private fun parseFunction(tokens: List<Token>, startIndex: Int, annotations: Lis
         }
     }
     
-    val function = Function(visibility, name, genericDeclaration, returnType, parameters, body)
+    val function = Function(annotations, name, genericDeclaration, returnType, parameters, body)
     return Pair(function, index)
 }
 
@@ -329,7 +329,7 @@ private fun parseConstructor(tokens: List<Token>, startIndex: Int, annotations: 
     expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
     index = newIndex + 1
     
-    val constructor = Constructor(visibility, parameters, callsSuper, parentConstructorParameters, body)
+    val constructor = Constructor(annotations, parameters, callsSuper, parentConstructorParameters, body)
     return Pair(constructor, index)
 }
 
@@ -368,7 +368,7 @@ private fun parseValue(tokens: List<Token>, startIndex: Int, annotations: List<S
         emptyList()
     }
     
-    return Pair(Value(visibility, name, type, expression, getter), index)
+    return Pair(Value(annotations, name, type, expression, getter), index)
 }
 
 private fun parseVariable(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Variable, Int> {
@@ -424,7 +424,7 @@ private fun parseVariable(tokens: List<Token>, startIndex: Int, annotations: Lis
         getter = statements
     }
     
-    return Pair(Variable(visibility, name, type, expression, getter, setter), index)
+    return Pair(Variable(annotations, name, type, expression, getter, setter), index)
 }
 
 private fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>, Int> {
@@ -610,20 +610,12 @@ interface InterfaceElement
 interface ClassElement
 
 data class Initializer(val statements: List<Statement>): ModuleElement, ClassElement
-data class Interface(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<InterfaceElement>): ModuleElement
-data class Class(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<ClassElement>): ModuleElement
-data class Function(val visibility: Visibility, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
-data class Constructor(val visibility: Visibility, val parameters: List<Pair<String, Type>>, val callsSuper: Boolean, val parentConstructorParameters: List<Expression>, val children: List<Statement>?): ClassElement
-data class Variable(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: Pair<String, List<Statement>>): ModuleElement, InterfaceElement, ClassElement
-data class Value(val visibility: Visibility, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
-
-enum class Visibility {
-    PUBLIC, INTERNAL, PRIVATE;
-    
-    companion object {
-        val DEFAULT = PUBLIC
-    }
-}
+data class Interface(val annotations: List<String>, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<InterfaceElement>): ModuleElement
+data class Class(val annotations: List<String>, val name: String, val generics: GenericDeclaration?, val superTypes: List<Type>, val children: List<ClassElement>): ModuleElement
+data class Function(val annotations: List<String>, val name: String, val generics: GenericDeclaration?, val returnType: Type, val parameters: List<Pair<String, Type>>, val children: List<Statement>?): ModuleElement, InterfaceElement, ClassElement
+data class Constructor(val annotations: List<String>, val parameters: List<Pair<String, Type>>, val callsSuper: Boolean, val parentConstructorParameters: List<Expression>, val children: List<Statement>?): ClassElement
+data class Variable(val annotations: List<String>, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>, val setter: Pair<String, List<Statement>>): ModuleElement, InterfaceElement, ClassElement
+data class Value(val annotations: List<String>, val name: String, var type: Type?, val expression: Expression?, val getter: List<Statement>): ModuleElement, InterfaceElement, ClassElement
 
 sealed class Statement
 class LocalVariableStatement(val isValue: Boolean, val name: String, val type: Type?, val expression: Expression): Statement()

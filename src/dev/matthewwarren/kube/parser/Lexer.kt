@@ -126,14 +126,11 @@ enum class TokenType(val regex: Regex) {
     RETURN(Regex("""return""")),
     THIS(Regex("""this""")),
     SUPER(Regex("""super""")),
-    STATIC(Regex("""static""")),
-    PUBLIC(Regex("""public""")),
-    INTERNAL(Regex("""internal""")),
-    PRIVATE(Regex("""private""")),
     CLASS(Regex("""class""")),
     INTERFACE(Regex("""interface""")),
     IMPORT(Regex("""import""")),
     MODULE(Regex("""module""")),
+    ANNOTATION(Regex("""@[a-zA-Z_][a-zA-Z\d_]*""")),
     // identifier goes last so that keywords take precedence
     IDENTIFIER(Regex("""[a-zA-Z_][a-zA-Z\d_]*"""))
 }
