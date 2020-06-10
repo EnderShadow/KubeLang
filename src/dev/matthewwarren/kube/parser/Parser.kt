@@ -22,7 +22,7 @@ object Parser {
     }
 }
 
-fun parseModule(tokens: List<Token>, startIndex: Int): Pair<Module, Int> {
+private fun parseModule(tokens: List<Token>, startIndex: Int): Pair<Module, Int> {
     expect(tokens, startIndex, TokenType.MODULE, TokenType.IDENTIFIER, TokenType.LEFT_CURLY_BRACKET)
     
     val name = tokens[startIndex + 1].text
@@ -34,7 +34,7 @@ fun parseModule(tokens: List<Token>, startIndex: Int): Pair<Module, Int> {
     return Pair(Module(name, imports, contents), endIndex + 1)
 }
 
-fun parseImports(tokens: List<Token>, startIndex: Int): Pair<List<String>, Int> {
+private fun parseImports(tokens: List<Token>, startIndex: Int): Pair<List<String>, Int> {
     val imports = mutableListOf<String>()
     var index = startIndex
     while(index < tokens.size) {
@@ -47,7 +47,7 @@ fun parseImports(tokens: List<Token>, startIndex: Int): Pair<List<String>, Int> 
     return Pair(imports, index)
 }
 
-fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleElement>, Int> {
+private fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleElement>, Int> {
     val moduleContents = mutableListOf<ModuleElement>()
     var index = startIndex
     
@@ -80,7 +80,7 @@ fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List<ModuleE
     return Pair(moduleContents, index)
 }
 
-fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<InterfaceElement>, Int> {
+private fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<InterfaceElement>, Int> {
     val interfaceContents = mutableListOf<InterfaceElement>()
     var index = startIndex
     
@@ -104,7 +104,7 @@ fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<List<Inte
     return Pair(interfaceContents, index)
 }
 
-fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassElement>, Int> {
+private fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassElement>, Int> {
     val classContents = mutableListOf<ClassElement>()
     var index = startIndex
     
@@ -136,14 +136,14 @@ fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<ClassEle
     return Pair(classContents, index)
 }
 
-fun parseInitializer(tokens: List<Token>, startIndex: Int): Pair<Initializer, Int> {
+private fun parseInitializer(tokens: List<Token>, startIndex: Int): Pair<Initializer, Int> {
     expect(tokens, startIndex, TokenType.INIT, TokenType.LEFT_CURLY_BRACKET)
     val (statements, newIndex) = parseStatements(tokens, startIndex + 2)
     expect(tokens, newIndex, TokenType.RIGHT_CURLY_BRACKET)
     return Pair(Initializer(statements), newIndex + 1)
 }
 
-fun parseInterface(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Interface, Int> {
+private fun parseInterface(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Interface, Int> {
     expect(tokens, startIndex, TokenType.INTERFACE, TokenType.IDENTIFIER)
     val name = tokens[startIndex + 1].text
     var index = startIndex + 2
@@ -178,7 +178,7 @@ fun parseInterface(tokens: List<Token>, startIndex: Int, visibility: Visibility)
     return Pair(Interface(visibility, name, genericDeclaration, superTypes, interfaceContents), index)
 }
 
-fun parseClass(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Class, Int> {
+private fun parseClass(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Class, Int> {
     expect(tokens, startIndex, TokenType.CLASS, TokenType.IDENTIFIER)
     val name = tokens[startIndex + 1].text
     var index = startIndex + 2
@@ -213,7 +213,7 @@ fun parseClass(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pa
     return Pair(Class(visibility, name, genericDeclaration, superTypes, classContents), index)
 }
 
-fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, requiresBody: Boolean): Pair<Function, Int> {
+private fun parseFunction(tokens: List<Token>, startIndex: Int, annotations: List<String>, requiresBody: Boolean): Pair<Function, Int> {
     expect(tokens, startIndex, TokenType.FUN, TokenType.IDENTIFIER)
     val name = tokens[startIndex + 1].text
     var index = startIndex + 2
@@ -275,7 +275,7 @@ fun parseFunction(tokens: List<Token>, startIndex: Int, visibility: Visibility, 
     return Pair(function, index)
 }
 
-fun parseConstructor(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Constructor, Int> {
+private fun parseConstructor(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Constructor, Int> {
     expect(tokens, startIndex, TokenType.CONSTRUCTOR, TokenType.LEFT_PARENTHESIS)
     
     var index = startIndex + 1
@@ -333,7 +333,7 @@ fun parseConstructor(tokens: List<Token>, startIndex: Int, visibility: Visibilit
     return Pair(constructor, index)
 }
 
-fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Value, Int> {
+private fun parseValue(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Value, Int> {
     expect(tokens, startIndex, TokenType.VAL, TokenType.IDENTIFIER)
     val name = tokens[startIndex + 1].text
     var index = startIndex + 2
@@ -371,7 +371,7 @@ fun parseValue(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pa
     return Pair(Value(visibility, name, type, expression, getter), index)
 }
 
-fun parseVariable(tokens: List<Token>, startIndex: Int, visibility: Visibility): Pair<Variable, Int> {
+private fun parseVariable(tokens: List<Token>, startIndex: Int, annotations: List<String>): Pair<Variable, Int> {
     expect(tokens, startIndex, TokenType.VAR, TokenType.IDENTIFIER)
     val name = tokens[startIndex + 1].text
     var index = startIndex + 2
@@ -427,7 +427,7 @@ fun parseVariable(tokens: List<Token>, startIndex: Int, visibility: Visibility):
     return Pair(Variable(visibility, name, type, expression, getter, setter), index)
 }
 
-fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>, Int> {
+private fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>, Int> {
     val statements = mutableListOf<Statement>()
     var index = startIndex
     while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
@@ -438,7 +438,7 @@ fun parseStatements(tokens: List<Token>, startIndex: Int): Pair<List<Statement>,
     return Pair(statements, index)
 }
 
-fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
+private fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
     return when(tokens[startIndex].type) {
         TokenType.VAL, TokenType.VAR -> parseLocalVariableStatement(tokens, startIndex)
         TokenType.IF -> parseIfElseStatement(tokens, startIndex)
@@ -475,31 +475,31 @@ fun parseStatement(tokens: List<Token>, startIndex: Int): Pair<Statement, Int> {
     }
 }
 
-fun parseLocalVariableStatement(tokens: List<Token>, startIndex: Int): Pair<LocalVariableStatement, Int> {
+private fun parseLocalVariableStatement(tokens: List<Token>, startIndex: Int): Pair<LocalVariableStatement, Int> {
     TODO()
 }
 
-fun parseIfElseStatement(tokens: List<Token>, startIndex: Int): Pair<IfElseStatement, Int> {
+private fun parseIfElseStatement(tokens: List<Token>, startIndex: Int): Pair<IfElseStatement, Int> {
     TODO()
 }
 
-fun parseForStatement(tokens: List<Token>, startIndex: Int): Pair<ForStatement, Int> {
+private fun parseForStatement(tokens: List<Token>, startIndex: Int): Pair<ForStatement, Int> {
     TODO()
 }
 
-fun parseWhileStatement(tokens: List<Token>, startIndex: Int): Pair<WhileStatement, Int> {
+private fun parseWhileStatement(tokens: List<Token>, startIndex: Int): Pair<WhileStatement, Int> {
     TODO()
 }
 
-fun parseDoWhileStatement(tokens: List<Token>, startIndex: Int): Pair<DoWhileStatement, Int> {
+private fun parseDoWhileStatement(tokens: List<Token>, startIndex: Int): Pair<DoWhileStatement, Int> {
     TODO()
 }
 
-fun parseExpression(tokens: List<Token>, startIndex: Int): Pair<Expression, Int> {
+private fun parseExpression(tokens: List<Token>, startIndex: Int): Pair<Expression, Int> {
     TODO()
 }
 
-fun parseGenericDeclaration(tokens: List<Token>, startIndex: Int): Pair<GenericDeclaration, Int> {
+private fun parseGenericDeclaration(tokens: List<Token>, startIndex: Int): Pair<GenericDeclaration, Int> {
     expect(tokens, startIndex, TokenType.LEFT_ANGLE_BRACKET)
     val genericTypes = mutableListOf<Pair<String, Type>>()
     var index = startIndex
@@ -522,7 +522,7 @@ fun parseGenericDeclaration(tokens: List<Token>, startIndex: Int): Pair<GenericD
     return Pair(GenericDeclaration(genericTypes), index + 1)
 }
 
-fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
+private fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
     val types = mutableListOf<Type>()
     var index = startIndex
     do {
@@ -534,14 +534,14 @@ fun parseTypeList(tokens: List<Token>, startIndex: Int): Pair<List<Type>, Int> {
     return Pair(types, index)
 }
 
-fun parseParameter(tokens: List<Token>, startIndex: Int): Pair<Pair<String, Type>, Int> {
+private fun parseParameter(tokens: List<Token>, startIndex: Int): Pair<Pair<String, Type>, Int> {
     expect(tokens, startIndex, TokenType.IDENTIFIER, TokenType.COLON)
     val name = tokens[startIndex].text
     val (type, index) = parseType(tokens, startIndex + 2)
     return Pair(Pair(name, type), index)
 }
 
-fun parseType(tokens: List<Token>, startIndex: Int): Pair<Type, Int> {
+private fun parseType(tokens: List<Token>, startIndex: Int): Pair<Type, Int> {
     TODO()
 }
 
