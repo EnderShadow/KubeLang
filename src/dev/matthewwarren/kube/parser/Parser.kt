@@ -248,7 +248,7 @@ private fun parseFunction(tokens: List<Token>, startIndex: Int, annotations: Lis
         type
     }
     else {
-        Type.UNIT
+        Type.NONE
     }
     
     val body = if(requiresBody) {
@@ -651,7 +651,7 @@ data class Generic(val generics: List<Type>) {
 sealed class Type(val name: String) {
     companion object {
         val ANY = ObjectType("Any", null)
-        val UNIT = TupleType(emptyList())
+        val NONE = TupleType(emptyList())
     }
     
     override fun toString() = name
