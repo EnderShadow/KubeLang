@@ -44,7 +44,7 @@ data class Token(val file: File, val line: Int, val column: Int, val type: Token
 enum class TokenType(val regex: Regex) {
     WHITESPACE(Regex("""\s+""")),
     COMMENT(Regex("""#.*""")),
-    NULL_LITERAL(Regex("""null""")),
+    NONE_LITERAL(Regex("""none""")),
     CHARACTER_LITERAL(Regex("""'([^'\\]|\\[btnr\\"']|\\u[a-fA-F\d]{4}|\\U[a-fA-F\d]{6})'""")),
     STRING_LITERAL(Regex(""""([^"\\]|\\[btnr\\"']|\\u[a-fA-F\d]{4}|\\U[a-fA-F\d]{6})*"""")),
     RAW_STRING_LITERAL(Regex("""""\".*?""\"""")),
