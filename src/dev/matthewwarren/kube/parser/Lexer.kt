@@ -131,7 +131,8 @@ enum class TokenType(val regex: Regex) {
     ENUM(Regex("""enum""")),
     IMPORT(Regex("""import""")),
     MODULE(Regex("""module""")),
-    ANNOTATION(Regex("""@[a-zA-Z_][a-zA-Z\d_]*""")),
+    ANNOTATION(Regex("""annotation""")),
+    ANNOTATION_REFERENCE(Regex("""@[a-zA-Z_][a-zA-Z\d_]*""")),
     // identifier goes last so that keywords take precedence
     IDENTIFIER(Regex("""[a-zA-Z_][a-zA-Z\d_]*"""))
 }

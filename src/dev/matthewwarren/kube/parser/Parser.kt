@@ -59,7 +59,7 @@ private fun parseModuleContents(tokens: List<Token>, startIndex: Int): Pair<List
         }
         else {
             val annotations = mutableListOf<String>()
-            while(check(tokens, index, TokenType.ANNOTATION)) {
+            while(check(tokens, index, TokenType.ANNOTATION_REFERENCE)) {
                 annotations.add(tokens[index].text)
                 index++
             }
@@ -86,7 +86,7 @@ private fun parseInterfaceContents(tokens: List<Token>, startIndex: Int): Pair<L
     
     while(!check(tokens, index, TokenType.RIGHT_CURLY_BRACKET)) {
         val annotations = mutableListOf<String>()
-        while(check(tokens, index, TokenType.ANNOTATION)) {
+        while(check(tokens, index, TokenType.ANNOTATION_REFERENCE)) {
             annotations.add(tokens[index].text)
             index++
         }
@@ -116,7 +116,7 @@ private fun parseClassContents(tokens: List<Token>, startIndex: Int): Pair<List<
         }
         else {
             val annotations = mutableListOf<String>()
-            while(check(tokens, index, TokenType.ANNOTATION)) {
+            while(check(tokens, index, TokenType.ANNOTATION_REFERENCE)) {
                 annotations.add(tokens[index].text)
                 index++
             }
