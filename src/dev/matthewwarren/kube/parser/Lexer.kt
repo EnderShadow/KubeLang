@@ -128,6 +128,7 @@ enum class TokenType(val regex: Regex) {
     SUPER(Regex("""super""")),
     CLASS(Regex("""class""")),
     INTERFACE(Regex("""interface""")),
+    ENUM(Regex("""enum""")),
     IMPORT(Regex("""import""")),
     MODULE(Regex("""module""")),
     ANNOTATION(Regex("""@[a-zA-Z_][a-zA-Z\d_]*""")),
