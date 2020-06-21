@@ -509,7 +509,18 @@ sumType
 
 simpleType
 	:	Identifier ('.' Identifier)? generic?
+	|   tupleType
+	|   functionType
 	;
+
+tupleType
+    :   '(' ')'
+    |   '(' type (',' type)* ')'
+    ;
+
+functionType
+    :   tupleType '->' type
+    ;
 
 Var
 	:	'var'
