@@ -9,8 +9,7 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements KubeVisitor<T>
-{
+public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements KubeVisitor<T> {
 	/**
 	 * {@inheritDoc}
 	 *
@@ -697,4 +696,18 @@ public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements K
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitSimpleType(KubeParser.SimpleTypeContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitTupleType(KubeParser.TupleTypeContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitFunctionType(KubeParser.FunctionTypeContext ctx) { return visitChildren(ctx); }
 }

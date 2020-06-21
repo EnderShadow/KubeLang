@@ -597,4 +597,16 @@ public interface KubeVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSimpleType(KubeParser.SimpleTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KubeParser#tupleType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTupleType(KubeParser.TupleTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KubeParser#functionType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionType(KubeParser.FunctionTypeContext ctx);
 }
