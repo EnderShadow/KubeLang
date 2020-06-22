@@ -504,22 +504,22 @@ unionType
 	;
 
 sumType
-	:	simpleType ('+' simpleType)*
+	:	primaryType ('+' primaryType)*
 	;
 
-simpleType
+primaryType
 	:	Identifier ('.' Identifier)? generic?
-	|   tupleType
 	|   functionType
+	|   '(' type ')'
 	;
-
-tupleType
-    :   '(' ')'
-    |   '(' type (',' type)* ')'
-    ;
 
 functionType
-    :   tupleType '->' type
+    :   functionParameterTypes '->' type
+    ;
+
+functionParameterTypes
+    :   '(' ')'
+    |   '(' type (',' type)* ')'
     ;
 
 Var

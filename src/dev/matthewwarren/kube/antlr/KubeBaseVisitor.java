@@ -1,4 +1,5 @@
-package dev.matthewwarren.kube.antlr;// Generated from /home/matthew/Desktop/Programming/Kotlin/Projects/KubeCompiler/grammar/Kube.g4 by ANTLR 4.8
+// Generated from /home/matthew/Desktop/Programming/Kotlin/Projects/KubeCompiler/grammar/Kube.g4 by ANTLR 4.8
+package dev.matthewwarren.kube.antlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -695,14 +696,7 @@ public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements K
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSimpleType(KubeParser.SimpleTypeContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitTupleType(KubeParser.TupleTypeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitPrimaryType(KubeParser.PrimaryTypeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -710,4 +704,11 @@ public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements K
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitFunctionType(KubeParser.FunctionTypeContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitFunctionParameterTypes(KubeParser.FunctionParameterTypesContext ctx) { return visitChildren(ctx); }
 }

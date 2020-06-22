@@ -1,4 +1,5 @@
-package dev.matthewwarren.kube.antlr;// Generated from /home/matthew/Desktop/Programming/Kotlin/Projects/KubeCompiler/grammar/Kube.g4 by ANTLR 4.8
+// Generated from /home/matthew/Desktop/Programming/Kotlin/Projects/KubeCompiler/grammar/Kube.g4 by ANTLR 4.8
+package dev.matthewwarren.kube.antlr;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -592,21 +593,21 @@ public interface KubeVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSumType(KubeParser.SumTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KubeParser#simpleType}.
+	 * Visit a parse tree produced by {@link KubeParser#primaryType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSimpleType(KubeParser.SimpleTypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KubeParser#tupleType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTupleType(KubeParser.TupleTypeContext ctx);
+	T visitPrimaryType(KubeParser.PrimaryTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KubeParser#functionType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunctionType(KubeParser.FunctionTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KubeParser#functionParameterTypes}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionParameterTypes(KubeParser.FunctionParameterTypesContext ctx);
 }
