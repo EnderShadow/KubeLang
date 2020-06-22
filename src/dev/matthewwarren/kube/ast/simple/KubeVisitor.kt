@@ -1,34 +1,58 @@
 package dev.matthewwarren.kube.ast.simple
 
+import dev.matthewwarren.kube.antlr.KubeBaseVisitor
 import dev.matthewwarren.kube.antlr.KubeParser.*
-import org.antlr.v4.runtime.tree.ErrorNode
-import org.antlr.v4.runtime.tree.ParseTree
-import org.antlr.v4.runtime.tree.RuleNode
-import org.antlr.v4.runtime.tree.TerminalNode
 
-class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
+class KubeVisitor: KubeBaseVisitor<ASTNode>() {
     override fun visitFile(ctx: FileContext): ASTFile {
         return ASTFile(ctx.module().map {visitModule(it)})
 	}
     
     override fun visitModule(ctx: ModuleContext): ASTModule {
-
+        val name = ctx.Identifier().text!!
+        val imports = ctx.importExpr().map {it.Identifier().text!!}
+        val contents = ctx.moduleContent().map {visitModuleContent(it)}
+        
+        return ASTModule(name, imports, contents)
 	}
     
-    override fun visitImportExpr(ctx: ImportExprContext): ASTNode {
-
+    override fun visitModuleContent(ctx: ModuleContentContext): ASTModuleContentNode {
+        val annotations = ctx.annotation1().map {
+            val ids = it.Identifier()
+            if(ids.size == 1)
+                Pair(null, ids[0].text)
+            else
+                Pair(ids[0].text, ids[1].text)
+        }
+        val content = visit(ctx.children.last()) as ASTModuleContentNode
+        
+        if(content is Annotatable)
+            content.annotations.addAll(annotations)
+        
+        return content
 	}
     
-    override fun visitModuleContent(ctx: ModuleContentContext): ASTNode {
-
-	}
+    override fun visitInitializer(ctx: InitializerContext): ASTInitializer {
+        val statements = ctx.statement().map {visitStatement(it)}
+        return ASTInitializer(statements)
+    }
     
-    override fun visitAlias(ctx: AliasContext): ASTNode {
-
-	}
+    override fun visitTypeAlias(ctx: TypeAliasContext): ASTTypeAlias {
+        val newName = ctx.Identifier().text
+        val type = visitType(ctx.type())
+        return ASTTypeAlias(newName, type)
+    }
     
-    override fun visitTypeAlias(ctx: TypeAliasContext): ASTNode {
-
+    override fun visitAlias(ctx: AliasContext): ASTAlias {
+        val ids = ctx.Identifier()
+        val newName = ids[0].text
+        
+        val oldName = if(ids.size == 2)
+            Pair(null, ids[1].text)
+        else
+            Pair(ids[1].text, ids[2].text)
+        
+        return ASTAlias(newName, oldName)
 	}
     
     override fun visitInterface0(ctx: Interface0Context): ASTNode {
@@ -119,10 +143,6 @@ class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
 
 	}
     
-    override fun visitInitializer(ctx: InitializerContext): ASTNode {
-
-	}
-    
     override fun visitFinalizer(ctx: FinalizerContext): ASTNode {
 
 	}
@@ -143,7 +163,7 @@ class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
 
 	}
     
-    override fun visitStatement(ctx: StatementContext): ASTNode {
+    override fun visitStatement(ctx: StatementContext): ASTStatement {
 
 	}
     
@@ -383,7 +403,7 @@ class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
 
 	}
     
-    override fun visitType(ctx: TypeContext): ASTNode {
+    override fun visitType(ctx: TypeContext): ASTType {
 
 	}
     
@@ -405,21 +425,5 @@ class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
     
     override fun visitFunctionParameterTypes(ctx: FunctionParameterTypesContext): ASTNode {
     
-    }
-    
-    override fun visitErrorNode(node: ErrorNode): ASTNode {
-    
-    }
-    
-    override fun visit(tree: ParseTree): ASTNode {
-    
-    }
-    
-    override fun visitTerminal(node: TerminalNode): ASTNode {
-    
-    }
-    
-    override fun visitChildren(node: RuleNode): ASTNode {
-        
     }
 }
