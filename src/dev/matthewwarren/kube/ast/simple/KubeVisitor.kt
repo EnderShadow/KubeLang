@@ -395,17 +395,17 @@ class KubeVisitor: dev.matthewwarren.kube.antlr.KubeVisitor<ASTNode> {
 
 	}
     
-    override fun visitSimpleType(ctx: SimpleTypeContext): ASTNode {
-
-	}
-    
-    override fun visitTupleType(ctx: TupleTypeContext): ASTNode {
+    override fun visitPrimaryType(ctx: PrimaryTypeContext): ASTNode {
 
 	}
     
     override fun visitFunctionType(ctx: FunctionTypeContext): ASTNode {
 
 	}
+    
+    override fun visitFunctionParameterTypes(ctx: FunctionParameterTypesContext): ASTNode {
+    
+    }
     
     override fun visitErrorNode(node: ErrorNode): ASTNode {
     
