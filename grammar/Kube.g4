@@ -45,7 +45,7 @@ interfaceElement
 	;
 
 class0
-	:	'class' Identifier genericDeclaration? primaryConstructor? (':' type)? (By expression (',' expression)*)? ('{' classElement* '}')?
+	:	'class' Identifier genericDeclaration? primaryConstructor? (':' type)? ('with' expression (',' expression)*)? ('{' classElement* '}')?
 	;
 
 classElement
@@ -58,7 +58,7 @@ classElement
 	;
 
 object0
-    :   'object' Identifier (':' type)? (By expression (',' expression)*)? ('{' objectElement* '}')
+    :   'object' Identifier (':' type)? ('with' expression (',' expression)*)? ('{' objectElement* '}')
     ;
 
 objectElement
@@ -383,7 +383,7 @@ lambdaParameter
     ;
 
 objectLiteral
-    :   'object' (':' type)? (By expression (',' expression)*)? ('{' objectElement* '}')
+    :   'object' (':' type)? ('with' expression (',' expression)*)? ('{' objectElement* '}')
     ;
 
 returnExpression
