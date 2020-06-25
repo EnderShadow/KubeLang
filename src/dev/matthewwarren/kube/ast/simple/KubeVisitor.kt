@@ -11,12 +11,12 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
     override fun visitModule(ctx: ModuleContext): ASTModule {
         val name = ctx.Identifier().text!!
         val imports = ctx.importExpr().map {it.Identifier().text!!}
-        val contents = ctx.moduleContent().map {visitModuleContent(it)}
+        val contents = ctx.moduleContent().map(this::visitModuleContent)
         
         return ASTModule(name, imports, contents)
 	}
     
-    override fun visitModuleContent(ctx: ModuleContentContext): ASTModuleContentNode {
+    override fun visitModuleContent(ctx: ModuleContentContext): ASTModuleContent {
         val annotations = ctx.annotation1().map {
             val ids = it.Identifier()
             if(ids.size == 1)
@@ -24,7 +24,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
             else
                 Pair(ids[0].text, ids[1].text)
         }
-        val content = visit(ctx.children.last()) as ASTModuleContentNode
+        val content = visit(ctx.children.last()) as ASTModuleContent
         
         if(content is Annotatable)
             content.annotations.addAll(annotations)
@@ -33,7 +33,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitInitializer(ctx: InitializerContext): ASTInitializer {
-        val statements = ctx.statement().map {visitStatement(it)}
+        val statements = ctx.statement().map(this::visitStatement)
         return ASTInitializer(statements)
     }
     
@@ -55,15 +55,32 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         return ASTAlias(newName, oldName)
 	}
     
-    override fun visitInterface0(ctx: Interface0Context): ASTNode {
-
+    override fun visitInterface0(ctx: Interface0Context): ASTInterface {
+        val name = ctx.Identifier().text
+        val genericDeclaration = ctx.genericDeclaration()?.let(this::visitGenericDeclaration)
+        val superType = ctx.type()?.let(this::visitType)
+        val elements = ctx.interfaceElement().map(this::visitInterfaceElement)
+        
+        return ASTInterface(name, genericDeclaration, superType, elements)
 	}
     
-    override fun visitInterfaceElement(ctx: InterfaceElementContext): ASTNode {
-
+    override fun visitInterfaceElement(ctx: InterfaceElementContext): ASTInterfaceContent {
+        val annotations = ctx.annotation1().map {
+            val ids = it.Identifier()
+            if(ids.size == 1)
+                Pair(null, ids[0].text)
+            else
+                Pair(ids[0].text, ids[1].text)
+        }
+        val content = visit(ctx.children.last()) as ASTInterfaceContent
+        
+        if(content is Annotatable)
+            content.annotations.addAll(annotations)
+    
+        return content
 	}
     
-    override fun visitClass0(ctx: Class0Context): ASTNode {
+    override fun visitClass0(ctx: Class0Context): ASTClass {
 
 	}
     
@@ -71,7 +88,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitObject0(ctx: Object0Context): ASTNode {
+    override fun visitObject0(ctx: Object0Context): ASTObject {
 
 	}
     
@@ -79,11 +96,11 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitEnum0(ctx: Enum0Context): ASTNode {
+    override fun visitEnum0(ctx: Enum0Context): ASTEnum {
 
 	}
     
-    override fun visitAnnotation0(ctx: Annotation0Context): ASTNode {
+    override fun visitAnnotation0(ctx: Annotation0Context): ASTAnnotation {
 
 	}
     
@@ -107,7 +124,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitVariable(ctx: VariableContext): ASTNode {
+    override fun visitVariable(ctx: VariableContext): ASTVariable {
 
 	}
     
@@ -115,7 +132,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitValue(ctx: ValueContext): ASTNode {
+    override fun visitValue(ctx: ValueContext): ASTValue {
 
 	}
     
@@ -131,7 +148,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitFunction(ctx: FunctionContext): ASTNode {
+    override fun visitFunction(ctx: FunctionContext): ASTFunction {
 
 	}
     
@@ -391,39 +408,62 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitGenericDeclaration(ctx: GenericDeclarationContext): ASTNode {
-
+    override fun visitGenericDeclaration(ctx: GenericDeclarationContext): ASTGenericDeclaration {
+        val nameTypeMapping = ctx.genericTypeDeclaration().map {
+            Pair(it.Identifier().text, it.type()?.let(this::visitType))
+        }
+        
+        return ASTGenericDeclaration(nameTypeMapping)
 	}
     
-    override fun visitGenericTypeDeclaration(ctx: GenericTypeDeclarationContext): ASTNode {
-
-	}
-    
-    override fun visitGeneric(ctx: GenericContext): ASTNode {
-
+    override fun visitGeneric(ctx: GenericContext): ASTGeneric {
+        val types = ctx.type().map(this::visitType)
+        return ASTGeneric(types)
 	}
     
     override fun visitType(ctx: TypeContext): ASTType {
-
+        return visitUnionType(ctx.unionType())
 	}
     
-    override fun visitUnionType(ctx: UnionTypeContext): ASTNode {
-
+    override fun visitUnionType(ctx: UnionTypeContext): ASTUnionType {
+        val types = ctx.sumType().map(this::visitSumType)
+        return ASTUnionType(types)
 	}
     
-    override fun visitSumType(ctx: SumTypeContext): ASTNode {
-
+    override fun visitSumType(ctx: SumTypeContext): ASTSumType {
+        val types = ctx.primaryType().map(this::visitPrimaryType)
+        return ASTSumType(types)
 	}
     
-    override fun visitPrimaryType(ctx: PrimaryTypeContext): ASTNode {
-
+    override fun visitPrimaryType(ctx: PrimaryTypeContext): ASTPrimaryType {
+        when {
+            ctx.Identifier().isNotEmpty() -> {
+                val module: String?
+                val name: String
+                if(ctx.Identifier().size == 1) {
+                    module = null
+                    name = ctx.Identifier(0).text
+                }
+                else {
+                    module = ctx.Identifier(0).text
+                    name = ctx.Identifier(1).text
+                }
+                val generic = ctx.generic()?.let(this::visitGeneric)
+                return ASTSimpleType(module, name, generic)
+            }
+            ctx.functionType() != null -> {
+                return visitFunctionType(ctx.functionType())
+            }
+            else -> {
+                return ASTParenthesizedType(visitType(ctx.type()))
+            }
+        }
 	}
     
-    override fun visitFunctionType(ctx: FunctionTypeContext): ASTNode {
-
+    override fun visitFunctionType(ctx: FunctionTypeContext): ASTFunctionType {
+        val parameterTypes = ctx.functionParameterTypes().type().map(this::visitType)
+        val returnType = visitType(ctx.type())
+        
+        return ASTFunctionType(parameterTypes, returnType)
 	}
-    
-    override fun visitFunctionParameterTypes(ctx: FunctionParameterTypesContext): ASTNode {
-    
-    }
 }
