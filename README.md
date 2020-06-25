@@ -1,17 +1,16 @@
 # KubeLang
-KubeLang is an object oriented language that I'm designing which uses a type system based on duck typing. The main reason I'm making
-KubeLang is that I think it would be interesting to have a compiled object-oriented duck-typed language. This is also an experiment
-to see how well it will perform as well as hopefully my first completed language.
+Kube is a strong statically typed object oriented programming language which supports duck typing through interfaces.
+Kube does not support inheritance since interfaces, delegation, union types, and intersection types provide the same
+functionality with more capabilities.
 
-## Main features of KubeLang
+## Main features of Kube
 - Duck typing
 - Compiled instead of interpreted
 - Inlined generics
 - Kotlin-like syntax
-  - Yes, I borrowed a lot of syntax from Kotlin
-  - Simple Kotlin files will likely compile file, but they not act correctly due to the type system
+- Union and intersection types
 
-HelloWorld in KubeLang would be something like this.
+Currently, HelloWorld in Kube would look like this.
 
     module HelloWorld {
         import IO
