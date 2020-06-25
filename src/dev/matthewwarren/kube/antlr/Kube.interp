@@ -295,7 +295,7 @@ genericTypeDeclaration
 generic
 type
 unionType
-sumType
+intersectionType
 primaryType
 functionType
 functionParameterTypes

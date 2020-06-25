@@ -61,7 +61,7 @@ public class KubeParser extends Parser {
 		RULE_isOperator = 83, RULE_inOperator = 84, RULE_hasOperator = 85, RULE_equalityOperator = 86, 
 		RULE_ifExpression = 87, RULE_elseExpression = 88, RULE_whenExpression = 89, 
 		RULE_whenExpressionEntry = 90, RULE_genericDeclaration = 91, RULE_genericTypeDeclaration = 92, 
-		RULE_generic = 93, RULE_type = 94, RULE_unionType = 95, RULE_sumType = 96, 
+		RULE_generic = 93, RULE_type = 94, RULE_unionType = 95, RULE_intersectionType = 96, 
 		RULE_primaryType = 97, RULE_functionType = 98, RULE_functionParameterTypes = 99;
 	private static String[] makeRuleNames() {
 		return new String[] {
@@ -85,7 +85,7 @@ public class KubeParser extends Parser {
 			"bitwiseOperator", "rangeOperator", "relationalOperator", "isOperator", 
 			"inOperator", "hasOperator", "equalityOperator", "ifExpression", "elseExpression", 
 			"whenExpression", "whenExpressionEntry", "genericDeclaration", "genericTypeDeclaration", 
-			"generic", "type", "unionType", "sumType", "primaryType", "functionType", 
+			"generic", "type", "unionType", "intersectionType", "primaryType", "functionType", 
 			"functionParameterTypes"
 		};
 	}
@@ -7443,11 +7443,11 @@ public class KubeParser extends Parser {
 	}
 
 	public static class UnionTypeContext extends ParserRuleContext {
-		public List<SumTypeContext> sumType() {
-			return getRuleContexts(SumTypeContext.class);
+		public List<IntersectionTypeContext> intersectionType() {
+			return getRuleContexts(IntersectionTypeContext.class);
 		}
-		public SumTypeContext sumType(int i) {
-			return getRuleContext(SumTypeContext.class,i);
+		public IntersectionTypeContext intersectionType(int i) {
+			return getRuleContext(IntersectionTypeContext.class,i);
 		}
 		public List<TerminalNode> BitwiseOr() { return getTokens(KubeParser.BitwiseOr); }
 		public TerminalNode BitwiseOr(int i) {
@@ -7472,7 +7472,7 @@ public class KubeParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(1438);
-			sumType();
+			intersectionType();
 			setState(1443);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,163,_ctx);
@@ -7483,7 +7483,7 @@ public class KubeParser extends Parser {
 					setState(1439);
 					match(BitwiseOr);
 					setState(1440);
-					sumType();
+					intersectionType();
 					}
 					} 
 				}
@@ -7504,7 +7504,7 @@ public class KubeParser extends Parser {
 		return _localctx;
 	}
 
-	public static class SumTypeContext extends ParserRuleContext {
+	public static class IntersectionTypeContext extends ParserRuleContext {
 		public List<PrimaryTypeContext> primaryType() {
 			return getRuleContexts(PrimaryTypeContext.class);
 		}
@@ -7515,20 +7515,20 @@ public class KubeParser extends Parser {
 		public TerminalNode Plus(int i) {
 			return getToken(KubeParser.Plus, i);
 		}
-		public SumTypeContext(ParserRuleContext parent, int invokingState) {
+		public IntersectionTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_sumType; }
+		@Override public int getRuleIndex() { return RULE_intersectionType; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof KubeVisitor ) return ((KubeVisitor<? extends T>)visitor).visitSumType(this);
+			if ( visitor instanceof KubeVisitor ) return ((KubeVisitor<? extends T>)visitor).visitIntersectionType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final SumTypeContext sumType() throws RecognitionException {
-		SumTypeContext _localctx = new SumTypeContext(_ctx, getState());
-		enterRule(_localctx, 192, RULE_sumType);
+	public final IntersectionTypeContext intersectionType() throws RecognitionException {
+		IntersectionTypeContext _localctx = new IntersectionTypeContext(_ctx, getState());
+		enterRule(_localctx, 192, RULE_intersectionType);
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);

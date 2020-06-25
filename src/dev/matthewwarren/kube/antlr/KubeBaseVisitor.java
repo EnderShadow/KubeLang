@@ -689,7 +689,7 @@ public class KubeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements K
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSumType(KubeParser.SumTypeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitIntersectionType(KubeParser.IntersectionTypeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

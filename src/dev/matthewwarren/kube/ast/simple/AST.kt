@@ -30,8 +30,8 @@ class ASTGeneric(val types: List<ASTType>): ASTNode
 class ASTStatement: ASTNode
 
 sealed class ASTType: ASTNode
-class ASTUnionType(val sumTypes: List<ASTSumType>): ASTType()
-class ASTSumType(val primaryTypes: List<ASTPrimaryType>): ASTType()
+class ASTUnionType(val intersectionTypes: List<ASTIntersectionType>): ASTType()
+class ASTIntersectionType(val primaryTypes: List<ASTPrimaryType>): ASTType()
 sealed class ASTPrimaryType: ASTType()
 class ASTSimpleType(val module: String?, val name: String, val generic: ASTGeneric?): ASTPrimaryType()
 class ASTFunctionType(val parameterTypes: List<ASTType>, val returnType: ASTType): ASTPrimaryType()

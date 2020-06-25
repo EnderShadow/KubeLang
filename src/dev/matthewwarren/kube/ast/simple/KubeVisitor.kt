@@ -426,13 +426,13 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitUnionType(ctx: UnionTypeContext): ASTUnionType {
-        val types = ctx.sumType().map(this::visitSumType)
+        val types = ctx.intersectionType().map(this::visitIntersectionType)
         return ASTUnionType(types)
 	}
     
-    override fun visitSumType(ctx: SumTypeContext): ASTSumType {
+    override fun visitIntersectionType(ctx: IntersectionTypeContext): ASTIntersectionType {
         val types = ctx.primaryType().map(this::visitPrimaryType)
-        return ASTSumType(types)
+        return ASTIntersectionType(types)
 	}
     
     override fun visitPrimaryType(ctx: PrimaryTypeContext): ASTPrimaryType {

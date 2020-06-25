@@ -587,11 +587,11 @@ public interface KubeVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitUnionType(KubeParser.UnionTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KubeParser#sumType}.
+	 * Visit a parse tree produced by {@link KubeParser#intersectionType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSumType(KubeParser.SumTypeContext ctx);
+	T visitIntersectionType(KubeParser.IntersectionTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KubeParser#primaryType}.
 	 * @param ctx the parse tree

@@ -500,10 +500,10 @@ type
 	;
 
 unionType
-	:	sumType ('|' sumType)*
+	:	intersectionType ('|' intersectionType)*
 	;
 
-sumType
+intersectionType
 	:	primaryType ('+' primaryType)*
 	;
 
