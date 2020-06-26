@@ -26,11 +26,6 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         return content
 	}
     
-    override fun visitInitializer(ctx: InitializerContext): ASTInitializer {
-        val statements = ctx.statement().map(this::visitStatement)
-        return ASTInitializer(statements)
-    }
-    
     override fun visitTypeAlias(ctx: TypeAliasContext): ASTTypeAlias {
         val newName = ctx.Identifier().text
         val type = visitType(ctx.type())
@@ -49,10 +44,10 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
     override fun visitInterface0(ctx: Interface0Context): ASTInterface {
         val name = ctx.Identifier().text
         val genericDeclaration = ctx.genericDeclaration()?.let(this::visitGenericDeclaration)
-        val superType = ctx.type()?.let(this::visitType)
+        val interfaces = ctx.type()?.let(this::visitType)
         val elements = ctx.interfaceElement().map(this::visitInterfaceElement)
         
-        return ASTInterface(name, genericDeclaration, superType, elements)
+        return ASTInterface(name, genericDeclaration, interfaces, elements)
 	}
     
     override fun visitInterfaceElement(ctx: InterfaceElementContext): ASTInterfaceContent {
@@ -66,23 +61,53 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitClass0(ctx: Class0Context): ASTClass {
-
+        val name = ctx.Identifier().text
+        val genericDeclaration = ctx.genericDeclaration()?.let(this::visitGenericDeclaration)
+        val primaryConstructor = ctx.primaryConstructor()?.constructorParameter()?.map(this::visitConstructorParameter) ?: emptyList()
+        val interfaces = ctx.type()?.let(this::visitType)
+        val delegates = ctx.expression().map(this::visitExpression)
+        val elements = ctx.classElement().map(this::visitClassElement)
+        
+        return ASTClass(name, genericDeclaration, primaryConstructor, interfaces, delegates, elements)
 	}
     
-    override fun visitClassElement(ctx: ClassElementContext): ASTNode {
-
+    override fun visitClassElement(ctx: ClassElementContext): ASTClassContent {
+        val annotations = ctx.annotation().map(this::visitAnnotation)
+        val content = visit(ctx.children.last()) as ASTClassContent
+    
+        if(content is Annotatable)
+            content.annotations.addAll(annotations)
+    
+        return content
 	}
     
     override fun visitObject0(ctx: Object0Context): ASTObject {
-
+        val name = ctx.Identifier().text
+        val interfaces = ctx.type()?.let(this::visitType)
+        val delegates = ctx.expression().map(this::visitExpression)
+        val elements = ctx.objectElement().map(this::visitObjectElement)
+    
+        return ASTObject(name, interfaces, delegates, elements)
 	}
     
-    override fun visitObjectElement(ctx: ObjectElementContext): ASTNode {
-
+    override fun visitObjectElement(ctx: ObjectElementContext): ASTObjectContent {
+        val annotations = ctx.annotation().map(this::visitAnnotation)
+        val content = visit(ctx.children.last()) as ASTObjectContent
+    
+        if(content is Annotatable)
+            content.annotations.addAll(annotations)
+    
+        return content
 	}
     
     override fun visitEnum0(ctx: Enum0Context): ASTEnum {
-
+        val name = ctx.Identifier().text
+        val primaryConstructor = ctx.primaryConstructor()?.constructorParameter()?.map(this::visitConstructorParameter) ?: emptyList()
+        val interfaces = ctx.type()?.let(this::visitType)
+        val enumValues = ctx.enumList().enumValue().map(this::visitEnumValue)
+        val elements = ctx.enumElement().map(this::visitEnumElement)
+        
+        return ASTEnum(name, primaryConstructor, interfaces, enumValues, elements)
 	}
     
     override fun visitAnnotation(ctx: AnnotationContext): ASTAnnotation {
@@ -95,26 +120,35 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitEnumList(ctx: EnumListContext): ASTNode {
-
+        throw IllegalStateException("Do not call this")
 	}
     
-    override fun visitEnumValue(ctx: EnumValueContext): ASTNode {
-
+    override fun visitEnumValue(ctx: EnumValueContext): ASTEnumValue {
+        val name = ctx.Identifier().text
+        val parameters = ctx.parameterExpression().map {Pair(it.Identifier()?.text, visitExpression(it.expression()))}
+        
+        return ASTEnumValue(name, parameters)
 	}
     
     override fun visitParameterExpression(ctx: ParameterExpressionContext): ASTNode {
-
+        throw IllegalStateException("Do not call this")
 	}
     
-    override fun visitEnumElement(ctx: EnumElementContext): ASTNode {
-
+    override fun visitEnumElement(ctx: EnumElementContext): ASTEnumContent {
+        val annotations = ctx.annotation().map(this::visitAnnotation)
+        val content = visit(ctx.children.last()) as ASTEnumContent
+    
+        if(content is Annotatable)
+            content.annotations.addAll(annotations)
+    
+        return content
 	}
     
     override fun visitVariable(ctx: VariableContext): ASTVariable {
 
 	}
     
-    override fun visitVariableDeclaration(ctx: VariableDeclarationContext): ASTNode {
+    override fun visitVariableDeclaration(ctx: VariableDeclarationContext): ASTVariableDeclaration {
 
 	}
     
@@ -122,7 +156,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitValueDeclaration(ctx: ValueDeclarationContext): ASTNode {
+    override fun visitValueDeclaration(ctx: ValueDeclarationContext): ASTValueDeclaration {
 
 	}
     
@@ -138,28 +172,47 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTNode {
+    override fun visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTFunctionDeclaration {
 
 	}
     
-    override fun visitParameter(ctx: ParameterContext): ASTNode {
-
+    override fun visitParameter(ctx: ParameterContext): ASTParameter {
+        val name = ctx.Identifier().text
+        val type = visitType(ctx.type())
+        val expression = ctx.expression()?.let(this::visitExpression)
+        
+        return ASTParameter(name, type, expression)
 	}
     
-    override fun visitFinalizer(ctx: FinalizerContext): ASTNode {
-
+    override fun visitInitializer(ctx: InitializerContext): ASTInitializer {
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTInitializer(statements)
+    }
+    
+    override fun visitFinalizer(ctx: FinalizerContext): ASTFinalizer {
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTFinalizer(statements)
 	}
     
     override fun visitPrimaryConstructor(ctx: PrimaryConstructorContext): ASTNode {
-
+        throw IllegalStateException("Do not call this")
 	}
     
-    override fun visitConstructorParameter(ctx: ConstructorParameterContext): ASTNode {
-
+    override fun visitConstructorParameter(ctx: ConstructorParameterContext): ASTConstructorParameter {
+        val variableType = if(ctx.Val() != null)
+            VariableType.VALUE
+        else if(ctx.Var() != null)
+            VariableType.VARIABLE
+        else
+            VariableType.CONSTRUCTOR_ONLY
+        
+        val parameter = visitParameter(ctx.parameter())
+        
+        return ASTConstructorParameter(variableType, parameter)
 	}
     
-    override fun visitConstructor(ctx: ConstructorContext): ASTNode {
-
+    override fun visitConstructor(ctx: ConstructorContext): ASTConstructor {
+    
 	}
     
     override fun visitConstructorCall(ctx: ConstructorCallContext): ASTNode {

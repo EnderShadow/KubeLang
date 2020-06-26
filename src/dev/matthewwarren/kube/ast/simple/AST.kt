@@ -3,6 +3,9 @@ package dev.matthewwarren.kube.ast.simple
 interface ASTNode
 interface ASTModuleContent: ASTNode
 interface ASTInterfaceContent: ASTNode
+interface ASTClassContent: ASTNode
+interface ASTObjectContent: ASTNode
+interface ASTEnumContent: ASTNode
 
 sealed class Annotatable {
     val annotations = mutableListOf<ASTAnnotation>()
@@ -11,19 +14,33 @@ sealed class Annotatable {
 class ASTFile(val modules: List<ASTModule>): ASTNode
 class ASTModule(val name: String, val imports: List<String>, val children: List<ASTModuleContent>): ASTNode
 
-class ASTInitializer(val statements: List<ASTStatement>): ASTModuleContent
 class ASTTypeAlias(val newName: String, val oldType: ASTType): ASTModuleContent
 class ASTAlias(val newName: String, val oldName: Pair<String?, String>): ASTModuleContent
 
-class ASTInterface(val name: String, val genericDeclaration: ASTGenericDeclaration?, val superType: ASTType?, val children: List<ASTInterfaceContent>): ASTModuleContent, Annotatable()
-class ASTClass: ASTModuleContent, Annotatable()
-class ASTObject: ASTModuleContent, Annotatable()
-class ASTEnum: ASTModuleContent, Annotatable()
-class ASTFunction: ASTModuleContent, Annotatable()
-class ASTVariable: ASTModuleContent, Annotatable()
-class ASTValue: ASTModuleContent, Annotatable()
+class ASTInterface(val name: String, val genericDeclaration: ASTGenericDeclaration?, val interfaces: ASTType?, val children: List<ASTInterfaceContent>): ASTModuleContent, Annotatable()
+class ASTClass(val name: String, val genericDeclaration: ASTGenericDeclaration?, val primaryConstructor: List<ASTConstructorParameter>, val interfaces: ASTType?, val delegates: List<ASTExpression>, val children: List<ASTClassContent>): ASTModuleContent, Annotatable()
+class ASTObject(val name: String, val interfaces: ASTType?, val delegates: List<ASTExpression>, val children: List<ASTObjectContent>): ASTModuleContent, Annotatable()
+class ASTEnum(val name: String, val primaryConstructor: List<ASTConstructorParameter>, val interfaces: ASTType?, val valueList: List<ASTEnumValue>, val elements: List<ASTEnumContent>): ASTModuleContent, Annotatable()
+class ASTFunction: ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
+class ASTVariable: ASTModuleContent, ASTClassContent, ASTObjectContent, Annotatable()
+class ASTValue: ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
+class ASTConstructor: ASTClassContent, Annotatable()
 
-class ASTAnnotation(module: String?, name: String, parameters: List<Pair<String?, ASTExpression>>): ASTNode
+class ASTVariableDeclaration: ASTInterfaceContent, Annotatable()
+class ASTValueDeclaration: ASTInterfaceContent, Annotatable()
+class ASTFunctionDeclaration: ASTInterfaceContent, Annotatable()
+
+class ASTInitializer(val statements: List<ASTStatement>): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent
+class ASTFinalizer(val statements: List<ASTStatement>): ASTClassContent, ASTObjectContent
+
+class ASTEnumValue(val name: String, val parameters: List<Pair<String?, ASTExpression>>): ASTNode
+
+class ASTAnnotation(val module: String?, val name: String, val parameters: List<Pair<String?, ASTExpression>>): ASTNode
+
+class ASTParameter(val name: String, val type: ASTType, val expression: ASTExpression?): ASTNode
+class ASTConstructorParameter(val variableType: VariableType, val name: String, val type: ASTType, val expression: ASTExpression?): ASTNode {
+    constructor(variableType: VariableType, parameter: ASTParameter): this(variableType, parameter.name, parameter.type, parameter.expression)
+}
 
 class ASTGenericDeclaration(val typeMaps: List<Pair<String, ASTType?>>): ASTNode
 class ASTGeneric(val types: List<ASTType>): ASTNode
@@ -38,3 +55,9 @@ sealed class ASTPrimaryType: ASTType()
 class ASTSimpleType(val module: String?, val name: String, val generic: ASTGeneric?): ASTPrimaryType()
 class ASTFunctionType(val parameterTypes: List<ASTType>, val returnType: ASTType): ASTPrimaryType()
 class ASTParenthesizedType(val type: ASTType): ASTPrimaryType()
+
+enum class VariableType {
+    VARIABLE,
+    VALUE,
+    CONSTRUCTOR_ONLY
+}
