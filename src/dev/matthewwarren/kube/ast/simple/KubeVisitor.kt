@@ -17,13 +17,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitModuleContent(ctx: ModuleContentContext): ASTModuleContent {
-        val annotations = ctx.annotation1().map {
-            val ids = it.Identifier()
-            if(ids.size == 1)
-                Pair(null, ids[0].text)
-            else
-                Pair(ids[0].text, ids[1].text)
-        }
+        val annotations = ctx.annotation().map(this::visitAnnotation)
         val content = visit(ctx.children.last()) as ASTModuleContent
         
         if(content is Annotatable)
@@ -47,10 +41,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         val ids = ctx.Identifier()
         val newName = ids[0].text
         
-        val oldName = if(ids.size == 2)
-            Pair(null, ids[1].text)
-        else
-            Pair(ids[1].text, ids[2].text)
+        val oldName = ids.toStringPair(1)
         
         return ASTAlias(newName, oldName)
 	}
@@ -65,13 +56,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitInterfaceElement(ctx: InterfaceElementContext): ASTInterfaceContent {
-        val annotations = ctx.annotation1().map {
-            val ids = it.Identifier()
-            if(ids.size == 1)
-                Pair(null, ids[0].text)
-            else
-                Pair(ids[0].text, ids[1].text)
-        }
+        val annotations = ctx.annotation().map(this::visitAnnotation)
         val content = visit(ctx.children.last()) as ASTInterfaceContent
         
         if(content is Annotatable)
@@ -100,12 +85,13 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitAnnotation0(ctx: Annotation0Context): ASTAnnotation {
-
-	}
-    
-    override fun visitAnnotation1(ctx: Annotation1Context): ASTNode {
-
+    override fun visitAnnotation(ctx: AnnotationContext): ASTAnnotation {
+        val (module, name) = ctx.Identifier().toStringPair()
+        val parameters = ctx.parameterExpression().map {
+            Pair(it.Identifier()?.text, visitExpression(it.expression()))
+        }
+        
+        return ASTAnnotation(module, name, parameters)
 	}
     
     override fun visitEnumList(ctx: EnumListContext): ASTNode {
@@ -232,7 +218,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitExpression(ctx: ExpressionContext): ASTNode {
+    override fun visitExpression(ctx: ExpressionContext): ASTExpression {
 
 	}
     
@@ -436,26 +422,17 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitPrimaryType(ctx: PrimaryTypeContext): ASTPrimaryType {
-        when {
+        return when {
             ctx.Identifier().isNotEmpty() -> {
-                val module: String?
-                val name: String
-                if(ctx.Identifier().size == 1) {
-                    module = null
-                    name = ctx.Identifier(0).text
-                }
-                else {
-                    module = ctx.Identifier(0).text
-                    name = ctx.Identifier(1).text
-                }
+                val (module, name) = ctx.Identifier().toStringPair()
                 val generic = ctx.generic()?.let(this::visitGeneric)
-                return ASTSimpleType(module, name, generic)
+                ASTSimpleType(module, name, generic)
             }
             ctx.functionType() != null -> {
-                return visitFunctionType(ctx.functionType())
+                visitFunctionType(ctx.functionType())
             }
             else -> {
-                return ASTParenthesizedType(visitType(ctx.type()))
+                ASTParenthesizedType(visitType(ctx.type()))
             }
         }
 	}

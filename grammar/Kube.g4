@@ -16,14 +16,13 @@ moduleContent
 	:	initializer
 	|	typeAlias
 	|	alias
-	|	annotation1* interface0
-	|	annotation1* class0
-	|   annotation1* object0
-	|	annotation1* enum0
-	|	annotation1* annotation0
-	|	annotation1* function
-	|	annotation1* variable
-	|	annotation1* value
+	|	annotation* interface0
+	|	annotation* class0
+	|   annotation* object0
+	|	annotation* enum0
+	|	annotation* function
+	|	annotation* variable
+	|	annotation* value
 	;
 
 alias
@@ -39,9 +38,9 @@ interface0
 	;
 
 interfaceElement
-	:	annotation1* variableDeclaration
-	|	annotation1* valueDeclaration
-	|	annotation1* functionDeclaration
+	:	annotation* variableDeclaration
+	|	annotation* valueDeclaration
+	|	annotation* functionDeclaration
 	;
 
 class0
@@ -49,10 +48,10 @@ class0
 	;
 
 classElement
-	:	annotation1* variable
-	|	annotation1* value
-	|	annotation1* function
-	|	annotation1* constructor
+	:	annotation* variable
+	|	annotation* value
+	|	annotation* function
+	|	annotation* constructor
 	|	initializer
 	|   finalizer
 	;
@@ -62,9 +61,9 @@ object0
     ;
 
 objectElement
-	:	annotation1* variable
-	|	annotation1* value
-	|	annotation1* function
+	:	annotation* variable
+	|	annotation* value
+	|	annotation* function
 	|	initializer
 	|   finalizer
 	;
@@ -74,12 +73,9 @@ enum0
 	|	'enum' Identifier primaryConstructor? (':' type)? '{' enumList ';' enumElement* '}'
 	;
 
-annotation0
-	:	'annotation' Identifier
-	;
-
-annotation1
-	:	'@' Identifier ('.' Identifier)?
+annotation
+	:	'@' Identifier ('.' Identifier)? ('(' ')')?
+	|   '@' Identifier ('.' Identifier) '(' parameterExpression (',' parameterExpression)* ')'
 	;
 
 enumList
@@ -96,8 +92,8 @@ parameterExpression
 	;
 
 enumElement
-	:	annotation1* value
-	|	annotation1* function
+	:	annotation* value
+	|	annotation* function
 	|	initializer
 	;
 
@@ -133,8 +129,8 @@ function
 	;
 
 functionDeclaration
-	:	'fun' Identifier genericDeclaration? '(' ')' (':' type)?
-	|	'fun' Identifier genericDeclaration? '(' parameter (',' parameter)* ')' (':' type)?
+	:	Fun Identifier genericDeclaration? '(' ')' (':' type)?
+	|	Fun Identifier genericDeclaration? '(' parameter (',' parameter)* ')' (':' type)?
 	;
 
 parameter
@@ -271,7 +267,7 @@ comparisonExpression
 	;
 
 infixOperation
-    :   elvisExpression (inOperator elvisExpression | isOperator type | hasOperator Identifier ':' type)*
+    :   elvisExpression (inOperator elvisExpression | isOperator type | hasOperator (Val | Var | Fun) Identifier ':' type)*
     ;
 
 elvisExpression
@@ -529,6 +525,10 @@ Var
 Val
 	:	'val'
 	;
+
+Fun
+    :   'fun'
+    ;
 
 NoneSafeAccess
 	:	'?.'

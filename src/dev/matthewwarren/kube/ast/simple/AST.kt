@@ -5,7 +5,7 @@ interface ASTModuleContent: ASTNode
 interface ASTInterfaceContent: ASTNode
 
 sealed class Annotatable {
-    val annotations = mutableListOf<Pair<String?, String>>()
+    val annotations = mutableListOf<ASTAnnotation>()
 }
 
 class ASTFile(val modules: List<ASTModule>): ASTNode
@@ -19,15 +19,17 @@ class ASTInterface(val name: String, val genericDeclaration: ASTGenericDeclarati
 class ASTClass: ASTModuleContent, Annotatable()
 class ASTObject: ASTModuleContent, Annotatable()
 class ASTEnum: ASTModuleContent, Annotatable()
-class ASTAnnotation: ASTModuleContent, Annotatable()
 class ASTFunction: ASTModuleContent, Annotatable()
 class ASTVariable: ASTModuleContent, Annotatable()
 class ASTValue: ASTModuleContent, Annotatable()
+
+class ASTAnnotation(module: String?, name: String, parameters: List<Pair<String?, ASTExpression>>): ASTNode
 
 class ASTGenericDeclaration(val typeMaps: List<Pair<String, ASTType?>>): ASTNode
 class ASTGeneric(val types: List<ASTType>): ASTNode
 
 class ASTStatement: ASTNode
+class ASTExpression: ASTNode
 
 sealed class ASTType: ASTNode
 class ASTUnionType(val intersectionTypes: List<ASTIntersectionType>): ASTType()

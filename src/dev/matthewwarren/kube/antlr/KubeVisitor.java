@@ -89,17 +89,11 @@ public interface KubeVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEnum0(KubeParser.Enum0Context ctx);
 	/**
-	 * Visit a parse tree produced by {@link KubeParser#annotation0}.
+	 * Visit a parse tree produced by {@link KubeParser#annotation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAnnotation0(KubeParser.Annotation0Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link KubeParser#annotation1}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnnotation1(KubeParser.Annotation1Context ctx);
+	T visitAnnotation(KubeParser.AnnotationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KubeParser#enumList}.
 	 * @param ctx the parse tree
