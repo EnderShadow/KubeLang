@@ -21,14 +21,14 @@ class ASTInterface(val name: String, val genericDeclaration: ASTGenericDeclarati
 class ASTClass(val name: String, val genericDeclaration: ASTGenericDeclaration?, val primaryConstructor: List<ASTConstructorParameter>, val interfaces: ASTType?, val delegates: List<ASTExpression>, val children: List<ASTClassContent>): ASTModuleContent, Annotatable()
 class ASTObject(val name: String, val interfaces: ASTType?, val delegates: List<ASTExpression>, val children: List<ASTObjectContent>): ASTModuleContent, Annotatable()
 class ASTEnum(val name: String, val primaryConstructor: List<ASTConstructorParameter>, val interfaces: ASTType?, val valueList: List<ASTEnumValue>, val elements: List<ASTEnumContent>): ASTModuleContent, Annotatable()
-class ASTFunction: ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
+class ASTFunction(val name: String, val genericDeclaration: ASTGenericDeclaration?, val parameters: List<ASTParameter>, val returnType: ASTType?, val body: List<ASTStatement>): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
 class ASTVariable(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?, val setter: ASTSetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, Annotatable()
 class ASTValue(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
 class ASTConstructor: ASTClassContent, Annotatable()
 
 class ASTVariableDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()
 class ASTValueDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()
-class ASTFunctionDeclaration: ASTInterfaceContent, Annotatable()
+class ASTFunctionDeclaration(val name: String, val genericDeclaration: ASTGenericDeclaration?, val parameters: List<ASTParameter>, val returnType: ASTType?): ASTInterfaceContent, Annotatable()
 
 class ASTInitializer(val statements: List<ASTStatement>): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent
 class ASTFinalizer(val statements: List<ASTStatement>): ASTClassContent, ASTObjectContent

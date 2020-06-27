@@ -197,11 +197,19 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitFunction(ctx: FunctionContext): ASTFunction {
-
+        val declaration = visitFunctionDeclaration(ctx.functionDeclaration())
+        val statements = ctx.statement().map(this::visitStatement)
+        
+        return ASTFunction(declaration.name, declaration.genericDeclaration, declaration.parameters, declaration.returnType, statements)
 	}
     
     override fun visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTFunctionDeclaration {
-
+        val name = ctx.Identifier().text
+        val genericDeclaration = ctx.genericDeclaration()?.let(this::visitGenericDeclaration)
+        val parameters = ctx.parameter().map(this::visitParameter)
+        val returnType = ctx.type()?.let(this::visitType)
+        
+        return ASTFunctionDeclaration(name, genericDeclaration, parameters, returnType)
 	}
     
     override fun visitParameter(ctx: ParameterContext): ASTParameter {
