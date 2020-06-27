@@ -22,12 +22,12 @@ class ASTClass(val name: String, val genericDeclaration: ASTGenericDeclaration?,
 class ASTObject(val name: String, val interfaces: ASTType?, val delegates: List<ASTExpression>, val children: List<ASTObjectContent>): ASTModuleContent, Annotatable()
 class ASTEnum(val name: String, val primaryConstructor: List<ASTConstructorParameter>, val interfaces: ASTType?, val valueList: List<ASTEnumValue>, val elements: List<ASTEnumContent>): ASTModuleContent, Annotatable()
 class ASTFunction: ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
-class ASTVariable: ASTModuleContent, ASTClassContent, ASTObjectContent, Annotatable()
-class ASTValue: ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
+class ASTVariable(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?, val setter: ASTSetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, Annotatable()
+class ASTValue(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
 class ASTConstructor: ASTClassContent, Annotatable()
 
-class ASTVariableDeclaration: ASTInterfaceContent, Annotatable()
-class ASTValueDeclaration: ASTInterfaceContent, Annotatable()
+class ASTVariableDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()
+class ASTValueDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()
 class ASTFunctionDeclaration: ASTInterfaceContent, Annotatable()
 
 class ASTInitializer(val statements: List<ASTStatement>): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent
@@ -41,6 +41,9 @@ class ASTParameter(val name: String, val type: ASTType, val expression: ASTExpre
 class ASTConstructorParameter(val variableType: VariableType, val name: String, val type: ASTType, val expression: ASTExpression?): ASTNode {
     constructor(variableType: VariableType, parameter: ASTParameter): this(variableType, parameter.name, parameter.type, parameter.expression)
 }
+
+class ASTGetter(val statements: List<ASTStatement>): ASTNode
+class ASTSetter(val parameter: String, val statements: List<ASTStatement>): ASTNode
 
 class ASTGenericDeclaration(val typeMaps: List<Pair<String, ASTType?>>): ASTNode
 class ASTGeneric(val types: List<ASTType>): ASTNode

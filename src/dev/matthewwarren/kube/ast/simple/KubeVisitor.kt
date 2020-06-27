@@ -145,27 +145,55 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitVariable(ctx: VariableContext): ASTVariable {
-
+        val declaration = visitVariableDeclaration(ctx.variableDeclaration())
+        if(ctx.By() != null) {
+            val expression = visitExpression(ctx.expression())
+            return ASTVariable(declaration.name, declaration.type, expression, true, null, null)
+        }
+        else {
+            val expression = ctx.expression()?.let(this::visitExpression)
+            val getter = ctx.getter()?.let(this::visitGetter)
+            val setter = ctx.setter()?.let(this::visitSetter)
+            return ASTVariable(declaration.name, declaration.type, expression, false, getter, setter)
+        }
 	}
     
     override fun visitVariableDeclaration(ctx: VariableDeclarationContext): ASTVariableDeclaration {
-
+        val name = ctx.Identifier().text
+        val type = ctx.type()?.let(this::visitType)
+        
+        return ASTVariableDeclaration(name, type)
 	}
     
     override fun visitValue(ctx: ValueContext): ASTValue {
-
+        val declaration = visitValueDeclaration(ctx.valueDeclaration())
+        if(ctx.By() != null) {
+            val expression = visitExpression(ctx.expression())
+            return ASTValue(declaration.name, declaration.type, expression, true, null)
+        }
+        else {
+            val expression = ctx.expression()?.let(this::visitExpression)
+            val getter = ctx.getter()?.let(this::visitGetter)
+            return ASTValue(declaration.name, declaration.type, expression, false, getter)
+        }
 	}
     
     override fun visitValueDeclaration(ctx: ValueDeclarationContext): ASTValueDeclaration {
-
+        val name = ctx.Identifier().text
+        val type = ctx.type()?.let(this::visitType)
+    
+        return ASTValueDeclaration(name, type)
 	}
     
-    override fun visitGetter(ctx: GetterContext): ASTNode {
-
+    override fun visitGetter(ctx: GetterContext): ASTGetter {
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTGetter(statements)
 	}
     
-    override fun visitSetter(ctx: SetterContext): ASTNode {
-
+    override fun visitSetter(ctx: SetterContext): ASTSetter {
+        val parameter = ctx.Identifier().text
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTSetter(parameter, statements)
 	}
     
     override fun visitFunction(ctx: FunctionContext): ASTFunction {
