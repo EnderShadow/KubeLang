@@ -24,7 +24,7 @@ class ASTEnum(val name: String, val primaryConstructor: List<ASTConstructorParam
 class ASTFunction(val name: String, val genericDeclaration: ASTGenericDeclaration?, val parameters: List<ASTParameter>, val returnType: ASTType?, val body: List<ASTStatement>): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
 class ASTVariable(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?, val setter: ASTSetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, Annotatable()
 class ASTValue(val name: String, val type: ASTType?, val expression: ASTExpression?, val delegated: Boolean, val getter: ASTGetter?): ASTModuleContent, ASTClassContent, ASTObjectContent, ASTEnumContent, Annotatable()
-class ASTConstructor: ASTClassContent, Annotatable()
+class ASTConstructor(val parameters: List<ASTParameter>, val parentConstructorParameters: List<Pair<String?, ASTExpression>>, val body: List<ASTStatement>): ASTClassContent, Annotatable()
 
 class ASTVariableDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()
 class ASTValueDeclaration(val name: String, val type: ASTType?): ASTInterfaceContent, Annotatable()

@@ -119,7 +119,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         return ASTAnnotation(module, name, parameters)
 	}
     
-    override fun visitEnumList(ctx: EnumListContext): ASTNode {
+    override fun visitEnumList(ctx: EnumListContext): Nothing {
         throw IllegalStateException("Do not call this")
 	}
     
@@ -130,7 +130,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         return ASTEnumValue(name, parameters)
 	}
     
-    override fun visitParameterExpression(ctx: ParameterExpressionContext): ASTNode {
+    override fun visitParameterExpression(ctx: ParameterExpressionContext): Nothing {
         throw IllegalStateException("Do not call this")
 	}
     
@@ -230,7 +230,7 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
         return ASTFinalizer(statements)
 	}
     
-    override fun visitPrimaryConstructor(ctx: PrimaryConstructorContext): ASTNode {
+    override fun visitPrimaryConstructor(ctx: PrimaryConstructorContext): Nothing {
         throw IllegalStateException("Do not call this")
 	}
     
@@ -248,11 +248,15 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitConstructor(ctx: ConstructorContext): ASTConstructor {
-    
+        val parameters = ctx.parameter().map(this::visitParameter)
+        val parentConstructorParameters = ctx.constructorCall()?.parameterExpression()?.map {Pair(it.Identifier()?.text, visitExpression(it.expression()))} ?: emptyList()
+        val statements = ctx.statement().map(this::visitStatement)
+        
+        return ASTConstructor(parameters, parentConstructorParameters, statements)
 	}
     
-    override fun visitConstructorCall(ctx: ConstructorCallContext): ASTNode {
-
+    override fun visitConstructorCall(ctx: ConstructorCallContext): Nothing {
+        throw IllegalStateException("Do not call this")
 	}
     
     override fun visitStatement(ctx: StatementContext): ASTStatement {
