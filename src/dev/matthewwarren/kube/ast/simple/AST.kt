@@ -48,7 +48,16 @@ class ASTSetter(val parameter: String, val statements: List<ASTStatement>): ASTN
 class ASTGenericDeclaration(val typeMaps: List<Pair<String, ASTType?>>): ASTNode
 class ASTGeneric(val types: List<ASTType>): ASTNode
 
-class ASTStatement: ASTNode
+sealed class ASTStatement: ASTNode
+class ASTVariableStatement(val variable: ASTVariable): ASTStatement()
+class ASTValueStatement(val value: ASTValue): ASTStatement()
+class ASTIfStatement(val condition: ASTExpression, thenBlock: List<ASTStatement>, elseBlock: List<ASTStatement>): ASTStatement()
+class ASTWhenStatement: ASTStatement()
+class ASTForLoop(val variable: String, val expression: ASTExpression, val statements: List<ASTStatement>): ASTStatement()
+class ASTWhileLoop(val condition: ASTExpression, val statements: List<ASTStatement>, val doWhile: Boolean): ASTStatement()
+class ASTAssignmentStatement(val assignmentOperator: AssignmentOperator, val left: ASTExpression, val right: ASTExpression): ASTStatement()
+class ASTExpressionStatement(val expression: ASTExpression): ASTStatement()
+
 class ASTExpression: ASTNode
 
 sealed class ASTType: ASTNode
@@ -63,4 +72,19 @@ enum class VariableType {
     VARIABLE,
     VALUE,
     CONSTRUCTOR_ONLY
+}
+
+enum class AssignmentOperator {
+    ASSIGN,
+    MULTIPLY_ASSIGN,
+    DIVIDE_ASSIDE,
+    MODULUS_ASSIGN,
+    ADD_ASSIGN,
+    SUBTRACT_ASSIGN,
+    LEFT_SHIFT_ASSIGN,
+    ARITHMETIC_RIGHT_SHIFT_ASSIGN,
+    LOGICAL_RIGHT_SHIFT_ASSIGN,
+    BITWISE_AND_ASSIGN,
+    BITWISE_XOR_ASSIGN,
+    BITWISE_OR_ASSIGN
 }

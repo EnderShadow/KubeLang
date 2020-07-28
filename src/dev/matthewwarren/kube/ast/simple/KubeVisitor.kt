@@ -260,18 +260,48 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 	}
     
     override fun visitStatement(ctx: StatementContext): ASTStatement {
-
+        return when {
+            ctx.variable() != null -> ASTVariableStatement(visitVariable(ctx.variable()))
+            ctx.value() != null -> ASTValueStatement(visitValue(ctx.value()))
+            ctx.expression().size == 1 -> ASTExpressionStatement(visitExpression(ctx.expression(0)))
+            ctx.expression().size == 2 -> {
+                val leftExpression = visitExpression(ctx.expression(0))
+                val rightExpression = visitExpression(ctx.expression(1))
+                val assignmentOperator = when(ctx.assignmentOperator().text) {
+                    "=" -> AssignmentOperator.ASSIGN
+                    "*=" -> AssignmentOperator.MULTIPLY_ASSIGN
+                    "/=" -> AssignmentOperator.DIVIDE_ASSIDE
+                    "%=" -> AssignmentOperator.MODULUS_ASSIGN
+                    "+=" -> AssignmentOperator.ADD_ASSIGN
+                    "-=" -> AssignmentOperator.SUBTRACT_ASSIGN
+                    "<<=" -> AssignmentOperator.LEFT_SHIFT_ASSIGN
+                    ">>=" -> AssignmentOperator.ARITHMETIC_RIGHT_SHIFT_ASSIGN
+                    ">>>=" -> AssignmentOperator.LOGICAL_RIGHT_SHIFT_ASSIGN
+                    "&=" -> AssignmentOperator.BITWISE_AND_ASSIGN
+                    "^=" -> AssignmentOperator.BITWISE_XOR_ASSIGN
+                    "|=" -> AssignmentOperator.BITWISE_OR_ASSIGN
+                    else -> throw IllegalStateException("Invalid Assignment Operator. Should never happen.")
+                }
+                
+                ASTAssignmentStatement(assignmentOperator, leftExpression, rightExpression)
+            }
+            else -> visit(ctx.getChild(0)) as ASTStatement
+        }
 	}
     
-    override fun visitIfStatement(ctx: IfStatementContext): ASTNode {
-
+    override fun visitIfStatement(ctx: IfStatementContext): ASTIfStatement {
+        val condition = visitExpression(ctx.expression())
+        val thenBlock = ctx.statement().map(this::visitStatement)
+        val elseBlock = ctx.elseBlock()?.statement()?.map(this::visitStatement) ?: emptyList()
+        
+        return ASTIfStatement(condition, thenBlock, elseBlock)
 	}
     
     override fun visitElseBlock(ctx: ElseBlockContext): ASTNode {
-
+        throw IllegalStateException("Do not call this")
 	}
     
-    override fun visitWhenStatement(ctx: WhenStatementContext): ASTNode {
+    override fun visitWhenStatement(ctx: WhenStatementContext): ASTWhenStatement {
 
 	}
     
@@ -295,20 +325,28 @@ class KubeVisitor: KubeBaseVisitor<ASTNode>() {
 
 	}
     
-    override fun visitForLoop(ctx: ForLoopContext): ASTNode {
-
+    override fun visitForLoop(ctx: ForLoopContext): ASTForLoop {
+        val variable = ctx.Identifier().text
+        val expression = visitExpression(ctx.expression())
+        val statements = ctx.statement().map(this::visitStatement)
+        
+        return ASTForLoop(variable, expression, statements)
 	}
     
-    override fun visitWhileLoop(ctx: WhileLoopContext): ASTNode {
-
+    override fun visitWhileLoop(ctx: WhileLoopContext): ASTWhileLoop {
+        val condition = visitExpression(ctx.expression())
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTWhileLoop(condition, statements, false)
 	}
     
-    override fun visitDoWhileLoop(ctx: DoWhileLoopContext): ASTNode {
-
+    override fun visitDoWhileLoop(ctx: DoWhileLoopContext): ASTWhileLoop {
+        val condition = visitExpression(ctx.expression())
+        val statements = ctx.statement().map(this::visitStatement)
+        return ASTWhileLoop(condition, statements, true)
 	}
     
-    override fun visitAssignmentOperator(ctx: AssignmentOperatorContext): ASTNode {
-
+    override fun visitAssignmentOperator(ctx: AssignmentOperatorContext): Nothing {
+        throw IllegalStateException("Do not call this")
 	}
     
     override fun visitExpression(ctx: ExpressionContext): ASTExpression {
